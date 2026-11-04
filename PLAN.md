@@ -15,6 +15,7 @@ These apply to every phase. When a decision is unclear, check it against this li
 5. **One new idea per level.** Each level adds exactly one concept or component.
 6. **Large touch targets, forgiving input.** Parts snap to the grid, wires auto-route, and the game assumes a tablet and small fingers.
 7. **Bridge to the real world.** Every circuit in the game can be built with a cheap real-world kit. The later phases add printable "build it for real" cards.
+8. **Dutch first, English optional.** The game is in Dutch: voice-over, labels, menus and the parent notes. A game setting, **"Engelse woorden tonen" (Show English words)**, shows the English term in a smaller, dimmer line *below* each Dutch label (for example **Weerstand** with *Resistor* underneath). It is off by default. Real electronics parts, datasheets and kits use English names, so this setting is also part of the bridge to the real world.
 
 ---
 
@@ -31,7 +32,7 @@ These apply to every phase. When a decision is unclear, check it against this li
 
 Alternative: Godot 4 is also a strong fit. Choose it if you prefer an editor-driven workflow. The plan below is engine-agnostic apart from the audio notes.
 
-**Rendering spec:** a logical resolution of 480×270, scaled by whole numbers (×4 = 1920×1080), with nearest-neighbor filtering. The breadboard hole pitch is 8 px, and components snap to that grid.
+**Rendering spec:** a logical resolution of 480×270, scaled by whole numbers (×4 = 1920×1080), with nearest-neighbor filtering. The real breadboard's hole pitch is 8 px, and components snap to that grid. The early "magic board" uses a coarser 16 px grid so the targets are big enough for small fingers.
 
 ---
 
@@ -87,10 +88,17 @@ Goal types grow over time: `ledOn`, `fanSpinning`, `ledOffWhen`, `truthTable` (f
 
 ### 3.4 Kid-facing UX
 - **Mascot:** an original character (for example, a small spark creature) who gives the voice prompts and rides along with the current dots.
-- **Voice-over** for every level intro, hint and celebration. *Tip:* record it yourself. Hearing a parent's voice is very motivating, and the game is automatically in your own language.
+- **Voice-over** in Dutch for every level intro, hint and celebration. *Tip:* record it yourself. Hearing a parent's voice is very motivating. Until the recordings exist, the browser's built-in Dutch text-to-speech (`nl-NL`) reads the lines aloud as a placeholder.
 - **Hints escalate with inactivity:** first the mascot points, then a ghost hand demonstrates the drag, then the part is auto-placed.
 - **Celebration:** the circuit "comes alive". The fan blows confetti and the LED lights up a little pixel room.
-- **Parent corner:** reached with a long-press. It holds the level select, the volume, a short note on what each level teaches, and settings.
+- **Parent corner:** reached with a long-press. It holds the level select, the volume, a short note on what each level teaches, and settings, including the English-labels toggle.
+
+### 3.5 Language & labels
+- Every on-screen string lives in one string table with a Dutch (`nl`) and an English (`en`) entry. Code never contains literal UI text.
+- A shared **label** component draws the Dutch text, and, when the setting is on, the English text in a smaller, dimmer line underneath. Layouts always reserve room for that second line, so turning it on never makes text overlap.
+- Level files use string keys (or `{ "nl": …, "en": … }` pairs) for titles and voice lines, never bare text.
+- The setting is saved in `localStorage` and changes take effect immediately, without restarting the level.
+- Dutch part names used in the game: Batterij (Battery), Draad (Wire), Lampje/LED (LED), Weerstand (Resistor), Schakelaar (Switch), Drukknop (Push button), Ventilator (Fan), Zoemer (Buzzer), Draaiknop (Potentiometer), Transistor (Transistor), Lichtsensor (Light sensor), Condensator (Capacitor), Luidspreker (Speaker).
 
 ---
 
@@ -169,6 +177,8 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 - [ ] Visual feedback: LED brightness, current-dot animation along wires, short-circuit and over-current states.
 - [ ] Goal checker + "level complete" screen.
 - [ ] Level loader from JSON, with three hard-coded World 1 levels.
+- [ ] Dutch string table with English entries, the two-line label component, and the "show English words" setting (a temporary toggle button until the parent corner exists in Phase 2).
+- [ ] Placeholder Dutch voice for level intros using the browser's text-to-speech.
 
 **Exit criteria:** your son can complete three levels on a tablet with only verbal help from you. The simulator test suite is green.
 
@@ -176,10 +186,10 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 **Goal:** one world that looks, sounds and feels like the final game.
 - [ ] Final pixel art for the board, battery, wire, LED (several colors), resistor and mascot. Add idle animations.
 - [ ] Juice: snap "click" sounds, sparkle on connect, a celebration animation, LED glow (an additive sprite).
-- [ ] Voice-over pipeline: per-level intro, hints and success lines (recorded and normalized, saved as .ogg/.mp3).
+- [ ] Voice-over pipeline: per-level intro, hints and success lines in Dutch (recorded and normalized, saved as .ogg/.mp3), replacing the text-to-speech placeholder.
 - [ ] Escalating hint system (point → ghost hand → auto-place).
 - [ ] World map / level select with icons and stars, plus save progress in `localStorage`.
-- [ ] Parent corner (long-press gate).
+- [ ] Parent corner (long-press gate), with the English-labels setting moved into it.
 - [ ] PWA manifest + offline caching, and test on the actual tablet he'll use.
 - [ ] All six World 1 levels.
 
@@ -225,7 +235,7 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 - [ ] **"Build it for real" cards:** for each ★ level, a printable page showing the real breadboard layout, a real photo-style pixel render and a parts list, using a safe 2×AA / 3 V battery pack.
 - [ ] Accessibility: color-blind-safe LED/wire colors, and a left-handed tray position.
 - [ ] Performance pass on low-end tablets, plus audio ducking and volume balance.
-- [ ] Localization hooks (voice-over sets per language).
+- [ ] Check every screen with English labels on and off, and add an English voice-over set only if it's ever wanted.
 - [ ] Final bug bash, then tag v1.0.
 
 **Exit criteria:** v1.0 deployed. Each world takes him about 1–2 short sessions. At least one ★ circuit has been built on a real breadboard together.
