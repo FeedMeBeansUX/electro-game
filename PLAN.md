@@ -148,16 +148,15 @@ An open breadboard with every unlocked part. It includes a "show numbers" toggle
 
 ## 5. Phased execution plan
 
-Effort estimates assume **one part-time developer** (evenings and weekends). Every phase ends with a **playtest with your son**, and that test is the gate to the next phase.
+Effort estimates assume **one part-time developer** (evenings and weekends). Every phase from Phase 1 onward ends with a **playtest with your son**, and that test is the gate to the next phase.
 
-### Phase 0: Pre-production (≈1–2 weeks)
-**Goal:** settle the scope, the look and the feel before writing much code.
-- [ ] **Paper prototype:** draw a breadboard on paper and cut out the parts. Let your son "build" World 1 and World 2 levels while you narrate. Watch where he gets confused.
+### Phase 0: Setup & style (≈1 week)
+**Goal:** get the project skeleton and the look settled so Phase 1 can start building right away.
 - [ ] Art style guide: palette, 8 px grid, a component sprite mock-up (battery, LED, wire, resistor, switch, fan), and a mascot sketch.
 - [ ] Choose the engine, set up the repo (Vite + TS + Phaser + Vitest + ESLint/Prettier) and the CI that deploys to GitHub Pages.
 - [ ] Write the list of voice-over lines for World 1.
 
-**Exit criteria:** a running empty Phaser project deployed to a URL, a mock-up screenshot of the board, and paper-prototype notes.
+**Exit criteria:** a running empty Phaser project deployed to a URL and a mock-up screenshot of the board. (This phase has no playtest. The first one is at the end of Phase 1.)
 
 ### Phase 1: Core tech prototype (≈3–4 weeks)
 **Goal:** prove that "drag parts, close the loop, light turns on" works and is fun, using placeholder art.
@@ -243,7 +242,7 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 |---|---|
 | The simulator is hard to get right (especially transistors and convergence) | Build it test-first. Start linear and add nonlinear parts one at a time. Use a fallback switch model. Iteration caps prevent freezes. |
 | Fine motor control of a 5-year-old | Big snapping targets, auto-routed wires, generous hit areas, no precision drags, and an undo button |
-| Concepts too abstract | Current-dot animation, stories and metaphors (speed bump, bucket, lever), and a paper prototype first |
+| Concepts too abstract | Current-dot animation, stories and metaphors (speed bump, bucket, lever), and an early playable prototype (Phase 1) to test them |
 | Frustration or boredom | Escalating hints, short levels, playtest every phase, and let him design levels with you in the editor |
 | Scope creep | Each phase has exit criteria. Phases 0–2 are a complete mini-game on their own. Worlds can ship one at a time. |
 | Teaching something wrong | Keep the physics honest. Simplify the *presentation*, not the behavior, and use conventional current direction consistently (+ to −). |
@@ -271,6 +270,5 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 
 ## 8. Immediate next steps
 
-1. Do the paper prototype this weekend. It's cheap, and it shows what he finds fun.
-2. Set up the Phase 0 repo skeleton and the GitHub Pages deploy.
-3. Write the simulator v1 test cases *before* the simulator itself.
+1. Set up the Phase 0 repo skeleton and the GitHub Pages deploy.
+2. Write the simulator v1 test cases *before* the simulator itself.
