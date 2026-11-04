@@ -1,0 +1,111 @@
+{
+  "id": "w5-l2",
+  "world": 5,
+  "index": 2,
+  "title": {
+    "nl": "Klein stroompje, grote stroom",
+    "en": "Tiny current, big current"
+  },
+  "intro": {
+    "nl": "Het middelste pootje van de transistor heet de basis. Verbind de basis met de weerstand: dan laat een heel klein stroompje het lampje branden.",
+    "en": "The middle leg of the transistor is called the base. Connect the base to the resistor: then a tiny current makes the light shine."
+  },
+  "parentNote": {
+    "nl": "Kijk naar de stroompuntjes: naar de basis gaan ze langzaam (weinig stroom), door het lampje veel sneller (veel stroom).",
+    "en": "Watch the current dots: slow into the base (little current), much faster through the LED (lots of current)."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [
+      {
+        "id": "rl",
+        "type": "resistor",
+        "pos": [
+          10,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          11,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "q",
+        "type": "transistor",
+        "pos": [
+          13,
+          3
+        ],
+        "rot": 2
+      },
+      {
+        "id": "rb",
+        "type": "resistor",
+        "pos": [
+          16,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 22000
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          14,
+          4
+        ],
+        "to": [
+          14,
+          10
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "wire",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [],
+    "wires": [
+      {
+        "from": [
+          16,
+          2
+        ],
+        "to": [
+          13,
+          2
+        ]
+      }
+    ]
+  }
+}

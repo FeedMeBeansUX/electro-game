@@ -1,5 +1,5 @@
-import { pinCells, wireEnds, type Board, type PlacedPart } from '../board/board';
-import { cellKey, sameCell, type Cell } from '../board/grid';
+import { netKey, pinCells, wireEnds, type Board, type PlacedPart } from '../board/board';
+import { sameCell, type Cell } from '../board/grid';
 import { partFromSpec, type LevelDef } from '../levels/levels';
 import { PART_DEFS } from '../parts/defs';
 
@@ -10,7 +10,9 @@ export type HintStep =
   /** Move, turn or set (switch on, knob position) a part that is already on the board. */
   | { kind: 'adjust'; partId: string; target: PlacedPart }
   /** Set a part the player placed (e.g. turn on the switch they just put in). */
-  | { kind: 'set'; target: PlacedPart };
+  | { kind: 'set'; target: PlacedPart }
+  /** Make it day or night with the sun/moon button. */
+  | { kind: 'light'; light: number };
 
 /** Whether a part's settings match the solution: switch on/off and knob position (buttons are momentary, so ignored). */
 export function settingsMatch(part: PlacedPart, target: PlacedPart): boolean {
@@ -43,29 +45,31 @@ export function solutionSteps(level: LevelDef): HintStep[] {
     steps.push({ kind: 'wire', from: { x: w.from[0], y: w.from[1] }, to: { x: w.to[0], y: w.to[1] } });
   }
   // Switching on comes last: first build, then try it.
+  if (level.solution.light !== undefined) settings.push({ kind: 'light', light: level.solution.light });
   return [...steps, ...settings];
 }
 
 /** Whether a part sits where `target` should be (either way round for non-polar parts). */
 export function samePlace(part: PlacedPart, target: PlacedPart): boolean {
   if (part.type !== target.type) return false;
-  const [a0, a1] = pinCells(part);
-  const [b0, b1] = pinCells(target);
-  if (sameCell(a0, b0) && sameCell(a1, b1)) return true;
-  return !PART_DEFS[part.type].polar && sameCell(a0, b1) && sameCell(a1, b0);
+  const a = pinCells(part);
+  const b = pinCells(target);
+  const same = (x: typeof a, y: typeof a) => x.every((c, i) => sameCell(c, y[i]));
+  return same(a, b) || (!PART_DEFS[part.type].polar && same(a, [...b].reverse()));
 }
 
-/** Whether two holes are joined by a chain of wires. */
+/** Whether two holes are joined by a chain of wires (and, on a breadboard, the hidden strips). */
 export function wiredTogether(board: Board, a: Cell, b: Cell): boolean {
+  const key = (c: Cell) => netKey(board, c);
   const adj = new Map<string, string[]>();
   for (const w of board.wires) {
-    const [e0, e1] = wireEnds(w).map(cellKey);
+    const [e0, e1] = wireEnds(w).map(key);
     adj.set(e0, [...(adj.get(e0) ?? []), e1]);
     adj.set(e1, [...(adj.get(e1) ?? []), e0]);
   }
-  const goal = cellKey(b);
-  const seen = new Set([cellKey(a)]);
-  const queue = [cellKey(a)];
+  const goal = key(b);
+  const seen = new Set([key(a)]);
+  const queue = [key(a)];
   while (queue.length) {
     const k = queue.shift()!;
     if (k === goal) return true;
@@ -91,6 +95,8 @@ export function isStepDone(board: Board, step: HintStep): boolean {
     }
     case 'set':
       return board.parts.some((p) => samePlace(p, step.target) && settingsMatch(p, step.target));
+    case 'light':
+      return ((board.light ?? 1) >= 0.5) === (step.light >= 0.5);
   }
 }
 

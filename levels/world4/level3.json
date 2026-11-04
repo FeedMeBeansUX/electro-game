@@ -1,0 +1,138 @@
+{
+  "id": "w4-l3",
+  "world": 4,
+  "index": 3,
+  "title": {
+    "nl": "De stroomrails",
+    "en": "The power rails"
+  },
+  "intro": {
+    "nl": "Bovenaan zit de plus-rail en onderaan de min-rail. Verbind de lampjes met de rails, dan krijgen ze allebei stroom.",
+    "en": "The plus rail is at the top and the minus rail at the bottom. Connect the lights to the rails so they both get power."
+  },
+  "parentNote": {
+    "nl": "De lange rails boven en onder brengen de stroom overal op het bord.",
+    "en": "The long rails at the top and bottom bring power all along the board."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [
+      {
+        "id": "r1",
+        "type": "resistor",
+        "pos": [
+          4,
+          2
+        ],
+        "rot": 0,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "r2",
+        "type": "resistor",
+        "pos": [
+          14,
+          7
+        ],
+        "rot": 0,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "id": "led2",
+        "type": "led",
+        "pos": [
+          16,
+          8
+        ],
+        "rot": 0,
+        "props": {
+          "color": "green"
+        }
+      }
+    ],
+    "wires": []
+  },
+  "inventory": [
+    {
+      "type": "wire",
+      "count": 4
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led1",
+      "minBrightness": 0.5
+    },
+    {
+      "kind": "ledOn",
+      "target": "led2",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [],
+    "wires": [
+      {
+        "from": [
+          3,
+          0
+        ],
+        "to": [
+          3,
+          3
+        ]
+      },
+      {
+        "from": [
+          7,
+          4
+        ],
+        "to": [
+          7,
+          10
+        ]
+      },
+      {
+        "from": [
+          13,
+          0
+        ],
+        "to": [
+          13,
+          6
+        ]
+      },
+      {
+        "from": [
+          17,
+          8
+        ],
+        "to": [
+          17,
+          10
+        ]
+      }
+    ]
+  }
+}

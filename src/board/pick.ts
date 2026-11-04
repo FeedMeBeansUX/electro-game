@@ -1,4 +1,4 @@
-import { canEndWire, inBounds, pinCells, wireEnds, type Board, type PlacedPart, type Wire } from './board';
+import { canEndWire, holeAt, pinCells, wireEnds, type Board, type PlacedPart, type Wire } from './board';
 import { sameCell, type Cell } from './grid';
 import { cellToWorld, worldToCell, type BoardLayout } from '../layout';
 
@@ -26,15 +26,15 @@ export function pickBoardTarget(board: Board, layout: BoardLayout, x: number, y:
   const p = { x, y };
   for (let i = board.parts.length - 1; i >= 0; i--) {
     const part = board.parts[i];
-    const [a, b] = pinCells(part).map((c) => cellToWorld(layout, c));
-    const onBody = distToSegment(p, a, b) <= BODY_REACH * s;
-    const nearPin = Math.min(dist(p, a), dist(p, b)) <= PIN_ZONE * s;
+    const pins = pinCells(part).map((c) => cellToWorld(layout, c));
+    const onBody = distToSegment(p, pins[0], pins[pins.length - 1]) <= BODY_REACH * s;
+    const nearPin = Math.min(...pins.map((pin) => dist(p, pin))) <= PIN_ZONE * s;
     if (onBody && !nearPin) return { type: 'part', part };
   }
   const cell = worldToCell(layout, x, y);
   const c = cellToWorld(layout, cell);
   const half = layout.cell / 2;
-  if (!inBounds(board, cell) || Math.abs(c.x - x) > half || Math.abs(c.y - y) > half) return null;
+  if (!holeAt(board, cell) || Math.abs(c.x - x) > half || Math.abs(c.y - y) > half) return null;
   for (let i = board.wires.length - 1; i >= 0; i--) {
     const wire = board.wires[i];
     if (wire.fixed) continue;

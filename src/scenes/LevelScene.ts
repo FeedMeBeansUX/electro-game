@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import {
   bestRotation,
   canPlacePart,
+  netKey,
   canPlaceWire,
   pinCells,
   routeWire,
@@ -128,6 +129,13 @@ export class LevelScene extends Phaser.Scene {
   private windG!: Phaser.GameObjects.Graphics;
   /** Fan blade angles, kept across re-renders so the blades spin smoothly. */
   private fanAngles = new Map<string, number>();
+  private xrayG!: Phaser.GameObjects.Graphics;
+  private xray = false;
+  private nightShade!: Phaser.GameObjects.Rectangle;
+  /** Route of the wires from the breadboard's built-in battery to its rails (for current dots). */
+  private supplyPaths: Point[][] = [];
+  /** The day/night button, on light-sensor levels. */
+  private skyButton: Button | null = null;
 
   constructor() {
     super('level');
@@ -139,6 +147,9 @@ export class LevelScene extends Phaser.Scene {
     this.returnTo = data.returnTo ?? 'map';
     this.pressed = null;
     this.fanAngles = new Map();
+    this.xray = false;
+    this.supplyPaths = [];
+    this.skyButton = null;
     this.ev = null;
     this.slots = [];
     this.drag = { kind: 'none' };
@@ -160,7 +171,7 @@ export class LevelScene extends Phaser.Scene {
     this.wireColor = this.level.fixed.wires.length;
 
     this.add.rectangle(0, 0, VIEW_W, VIEW_H, PAL.charcoal).setOrigin(0);
-    const boardKey = ensureBoardTexture(this, this.level.cols, this.level.rows);
+    const boardKey = ensureBoardTexture(this, this.level.cols, this.level.rows, this.board.kind ?? 'magic');
     this.add
       .image(this.layout.originX - 12 * this.s, this.layout.originY - 12 * this.s, boardKey)
       .setOrigin(0)
@@ -182,6 +193,10 @@ export class LevelScene extends Phaser.Scene {
     this.wiresG = this.add.graphics().setDepth(5);
     this.dotsG = this.add.graphics().setDepth(7);
     this.windG = this.add.graphics().setDepth(9);
+    this.xrayG = this.add.graphics().setDepth(3);
+    this.drawSupply();
+    // Night darkens the board, but sits under the LED glow (depth 11) so lights shine through.
+    this.nightShade = this.add.rectangle(0, 0, VIEW_W, TRAY_Y, PAL.ink, 0.6).setOrigin(0).setDepth(10.5).setVisible(false);
     this.previewG = this.add.graphics().setDepth(40);
     this.hints = new HintOverlay(this);
 
@@ -256,6 +271,27 @@ export class LevelScene extends Phaser.Scene {
         };
     new Label(this, VIEW_W / 2, 3, title, { size: 10, color: PAL.yellow });
     new Button(this, VIEW_W - 42, 14, { size: 20, icon: 'icon-speaker' }, () => this.sayIntro());
+    let x = VIEW_W - 68;
+    if (this.board.kind === 'breadboard') {
+      const eye = new Button(this, x, 14, { size: 20, icon: 'icon-eye' }, () => {
+        sfx.tap();
+        this.setXray(!this.xray);
+        eye.setColor(this.xray ? PAL.teal : PAL.slate);
+      });
+      x -= 26;
+      if (this.level.xray) {
+        this.time.delayedCall(0, () => {
+          this.setXray(true);
+          eye.setColor(PAL.teal);
+        });
+      }
+    }
+    if (this.level.dayNight) {
+      this.skyButton = new Button(this, x, 14, { size: 20, icon: 'icon-sun', color: PAL.sky }, () => {
+        sfx.tap();
+        this.setNight((this.board.light ?? 1) >= 0.5);
+      });
+    }
     addParentGate(this, VIEW_W - 16, 14);
   }
 
@@ -327,19 +363,75 @@ export class LevelScene extends Phaser.Scene {
     this.drag = { kind: 'pending', pointerId: p.id, start: { x: p.worldX, y: p.worldY }, target };
   }
 
-  /** Push buttons conduct only while held down. */
+  /** Held down: a push button closes, a touch pad is touched, a light sensor is covered. */
   private press(part: PlacedPart): void {
     this.pressed = part;
-    part.props.closed = true;
+    if (part.type === 'ldr') part.props.covered = true;
+    else part.props.closed = true;
     sfx.tap();
     this.refresh();
   }
 
   private release(): void {
     if (!this.pressed) return;
-    this.pressed.props.closed = false;
+    if (this.pressed.type === 'ldr') this.pressed.props.covered = false;
+    else this.pressed.props.closed = false;
     this.pressed = null;
     this.refresh();
+  }
+
+  // ─────────────────────────── Breadboard ───────────────────────────
+
+  /** Day or night: light sensors see the change, and the board darkens (lit LEDs still glow). */
+  private setNight(night: boolean): void {
+    this.board.light = night ? 0 : 1;
+    this.skyButton?.setColor(night ? PAL.navy : PAL.sky);
+    this.skyButton?.icon?.setTexture(night ? 'icon-moon' : 'icon-sun');
+    this.nightShade.setVisible(night);
+    this.sayKey(night ? 'sayNight' : 'sayDay', 3000);
+    this.refresh();
+  }
+
+  /** The breadboard's built-in battery, left of the board, wired to the + and − rails. */
+  private drawSupply(): void {
+    if (this.board.kind !== 'breadboard' || !this.board.supply) return;
+    const plus = cellToWorld(this.layout, { x: 0, y: 0 });
+    const minus = cellToWorld(this.layout, { x: 0, y: this.board.rows - 1 });
+    const x = Math.round(this.layout.originX - 30);
+    const cy = Math.round((plus.y + minus.y) / 2);
+    this.add.image(x, cy, 'part-battery-v').setAngle(90).setDepth(10);
+    const top = { x, y: cy - 32 };
+    const bottom = { x, y: cy + 32 };
+    this.supplyPaths = [
+      [top, { x, y: plus.y }, plus],
+      [minus, { x, y: minus.y }, bottom],
+    ];
+    const g = this.add.graphics().setDepth(5);
+    const seg = (a: Point, b: Point, color: number) =>
+      g.fillStyle(color, 1).fillRect(Math.min(a.x, b.x) - 1, Math.min(a.y, b.y) - 1, Math.abs(a.x - b.x) + 2, Math.abs(a.y - b.y) + 2);
+    seg(top, { x, y: plus.y }, PAL.red);
+    seg({ x, y: plus.y }, plus, PAL.red);
+    seg(bottom, { x, y: minus.y }, PAL.ink);
+    seg({ x, y: minus.y }, minus, PAL.ink);
+  }
+
+  /** "X-ray": shows the hidden metal strips under the breadboard that join the holes. */
+  private setXray(on: boolean): void {
+    this.xray = on;
+    const g = this.xrayG.clear();
+    if (!on) return;
+    if (this.level.xray) this.sayKey('sayXray', 60000);
+    const l = this.layout;
+    const at = (x: number, y: number) => cellToWorld(l, { x, y });
+    const bar = (a: Point, b: Point, color: number) =>
+      g.fillStyle(color, 0.45).fillRect(Math.min(a.x, b.x) - 3, Math.min(a.y, b.y) - 3, Math.abs(a.x - b.x) + 6, Math.abs(a.y - b.y) + 6);
+    bar(at(0, 0), at(l.cols - 1, 0), PAL.red);
+    bar(at(0, l.rows - 1), at(l.cols - 1, l.rows - 1), PAL.blue);
+    for (let c = 0; c < l.cols; c++) {
+      const color = c % 2 ? PAL.green : PAL.yellow;
+      bar(at(c, 2), at(c, 4), color);
+      bar(at(c, 6), at(c, 8), color);
+    }
   }
 
   private onPointerMove(p: Phaser.Input.Pointer): void {
@@ -633,8 +725,12 @@ export class LevelScene extends Phaser.Scene {
       } else if (ev.shorted) {
         if (!this.wasShorted) sfx.short();
         this.sayKey('sayShort');
+      } else if (this.board.kind === 'breadboard' && this.board.parts.some((p) => !p.fixed && legsShareStrip(this.board, p))) {
+        this.sayKey('saySameStrip');
       } else if (this.board.parts.some((p) => !p.fixed && isReversed(ev, p.id))) {
         this.sayKey('sayReversed');
+      } else if (this.board.parts.some((p) => !p.fixed && isBackwardsTransistor(ev, p.id))) {
+        this.sayKey('sayTransistorTurn');
       } else if (!this.complete) {
         const why = brightnessFeedback(this.level.goals, ev);
         if (why === 'tooBright') this.sayKey('sayTooBright', 10000);
@@ -709,6 +805,9 @@ export class LevelScene extends Phaser.Scene {
           .setData('fan', part.id);
         extras.push(blades);
       }
+      if (part === this.pressed && (part.type === 'ldr' || part.type === 'touch')) {
+        extras.push(this.add.image(x + 2 * s, y - 2 * s, 'hand').setScale(s * 1.4).setOrigin(0.35, 0.2).setDepth(12));
+      }
       if (part.type === 'pot') {
         const knob = this.add
           .image(x, y, 'pot-knob')
@@ -782,10 +881,18 @@ export class LevelScene extends Phaser.Scene {
     for (const part of this.board.parts) {
       const st = ev.parts.get(part.id);
       if (!st) continue;
-      const [a, b] = pinCells(part).map((c) => cellToWorld(this.layout, c));
+      const pins = pinCells(part).map((c) => cellToWorld(this.layout, c));
+      const a = pins[0];
+      const b = pins[pins.length - 1];
+      if (st.kind === 'transistor') {
+        // Collector current flows from C (pin 2) to E (pin 0); the small base current from B (pin 1) to E.
+        paths.push({ pts: [b, a], amps: st.amps }, { pts: [pins[1], a], amps: st.baseAmps });
+        continue;
+      }
       // Battery current is measured out of "+" (pin 0), so inside it flows from pin 1 to pin 0.
       paths.push({ pts: st.kind === 'battery' ? [b, a] : [a, b], amps: st.amps });
     }
+    for (const pts of this.supplyPaths) paths.push({ pts, amps: ev.supplyAmps });
     for (const { pts, amps } of paths) {
       const mag = Math.abs(amps);
       if (mag < MIN_VISIBLE_AMPS) continue;
@@ -927,6 +1034,10 @@ export class LevelScene extends Phaser.Scene {
       const to = cellToWorld(this.layout, step.target.pos);
       return { from: slot ? { x: slot.icon.x, y: slot.icon.y } : to, to };
     }
+    if (step.kind === 'light') {
+      const at = { x: this.skyButton?.x ?? VIEW_W / 2, y: this.skyButton?.y ?? 14 };
+      return { from: at, to: at };
+    }
     const at = cellToWorld(this.layout, this.stepPart(step)?.pos ?? step.target.pos);
     return { from: at, to: at };
   }
@@ -934,6 +1045,7 @@ export class LevelScene extends Phaser.Scene {
   private hintLine(step: HintStep): StringKey {
     if (step.kind === 'wire') return 'sayWireHowTo';
     if (step.kind === 'place') return 'sayHintPlace';
+    if (step.kind === 'light') return step.light < 0.5 ? 'sayHintNight' : 'sayDay';
     const type = step.target.type;
     if (type === 'switch') return 'sayHintSwitch';
     if (type === 'button') return 'sayHintPress';
@@ -944,7 +1056,7 @@ export class LevelScene extends Phaser.Scene {
   private hintPoint(step: HintStep): void {
     const { from, to } = this.stepPoints(step);
     this.hints.clear();
-    if (step.kind === 'adjust' || step.kind === 'set') this.hints.point(from);
+    if (step.kind === 'adjust' || step.kind === 'set' || step.kind === 'light') this.hints.point(from);
     else this.hints.point(from, to);
     this.mascot.hop();
     sfx.hint();
@@ -994,6 +1106,9 @@ export class LevelScene extends Phaser.Scene {
         this.celebrateConnections(pinCells(part));
         done = true;
       }
+    } else if (step.kind === 'light') {
+      this.setNight(step.light < 0.5);
+      done = true;
     } else {
       const part = this.stepPart(step);
       // A push button can't be held down for the child; keep showing how instead.
@@ -1014,7 +1129,7 @@ export class LevelScene extends Phaser.Scene {
       this.sayKey('sayHintHelp', 0);
       this.mascot.hop(2);
       this.refresh(false);
-    } else if (step.kind === 'adjust' || step.kind === 'set') {
+    } else if (step.kind !== 'wire' && step.kind !== 'place') {
       this.hints.tap(this.stepPoints(step).from);
     }
     // Start the hint cycle again for the next step.
@@ -1105,6 +1220,18 @@ export class LevelScene extends Phaser.Scene {
     }
     this.tweens.add({ targets: card, y: TRAY_Y, duration: 350, ease: 'Back.easeOut' });
   }
+}
+
+/** Whether two legs of a part stand in the same breadboard strip (so the part is bypassed). */
+function legsShareStrip(board: Board, part: PlacedPart): boolean {
+  const nets = pinCells(part).map((c) => netKey(board, c));
+  return new Set(nets).size < nets.length;
+}
+
+/** A transistor with collector and emitter swapped still conducts a little, the wrong way (emitter to collector). */
+function isBackwardsTransistor(ev: BoardEval, id: string): boolean {
+  const st = ev.parts.get(id);
+  return st?.kind === 'transistor' && st.amps < -1e-4;
 }
 
 function isReversed(ev: BoardEval, id: string): boolean {

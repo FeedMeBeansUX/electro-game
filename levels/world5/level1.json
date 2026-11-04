@@ -1,0 +1,130 @@
+{
+  "id": "w5-l1",
+  "world": 5,
+  "index": 1,
+  "title": {
+    "nl": "De toverschakelaar",
+    "en": "The magic switch"
+  },
+  "intro": {
+    "nl": "Een transistor is een toverschakelaar: een klein stroompje in het middelste pootje zet een grote stroom aan. Zet de transistor erin en druk op de knop!",
+    "en": "A transistor is a magic switch: a tiny current in its middle leg turns on a big current. Put the transistor in and press the button!"
+  },
+  "parentNote": {
+    "nl": "Door de knop loopt maar een klein stroompje naar de basis. Dat laat een veel grotere stroom door de ventilator lopen.",
+    "en": "Only a small current flows through the button into the base. That lets a much bigger current flow through the fan."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [
+      {
+        "id": "fan",
+        "type": "fan",
+        "pos": [
+          14,
+          1
+        ],
+        "rot": 1
+      },
+      {
+        "id": "btn",
+        "type": "button",
+        "pos": [
+          8,
+          1
+        ],
+        "rot": 1
+      },
+      {
+        "id": "rb",
+        "type": "resistor",
+        "pos": [
+          9,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "resistance": 1000
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          12,
+          4
+        ],
+        "to": [
+          12,
+          10
+        ]
+      },
+      {
+        "from": [
+          10,
+          2
+        ],
+        "to": [
+          13,
+          2
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "transistor",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "truthTable",
+      "inputs": [
+        "btn"
+      ],
+      "output": "fan",
+      "expect": "and",
+      "live": true
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "transistor",
+      "pos": [
+        13,
+        3
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "transistor",
+        "pos": [
+          13,
+          3
+        ],
+        "rot": 0
+      },
+      {
+        "id": "btn",
+        "type": "button",
+        "pos": [
+          8,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": []
+  }
+}

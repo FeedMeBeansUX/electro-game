@@ -1,0 +1,152 @@
+{
+  "id": "w5-l5",
+  "world": 5,
+  "index": 5,
+  "title": {
+    "nl": "De aanraakknop",
+    "en": "The touch switch"
+  },
+  "intro": {
+    "nl": "Maak een aanraakknop! Een vinger laat maar een heel klein stroompje door. Eén transistor is niet genoeg: zet er een tweede bij, dan helpen ze elkaar.",
+    "en": "Make a touch switch! A finger lets only a tiny current through. One transistor isn't enough: add a second one so they help each other."
+  },
+  "parentNote": {
+    "nl": "Twee transistors achter elkaar (een Darlington) versterken een piepklein stroompje duizenden keren.",
+    "en": "Two transistors in a chain (a Darlington pair) amplify a tiny current thousands of times."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [
+      {
+        "id": "rl",
+        "type": "resistor",
+        "pos": [
+          18,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 47
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          18,
+          5
+        ],
+        "rot": 1,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "q2",
+        "type": "transistor",
+        "pos": [
+          19,
+          7
+        ],
+        "rot": 2
+      },
+      {
+        "id": "pad",
+        "type": "touch",
+        "pos": [
+          21,
+          1
+        ],
+        "rot": 1
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          20,
+          8
+        ],
+        "to": [
+          20,
+          10
+        ]
+      },
+      {
+        "from": [
+          22,
+          2
+        ],
+        "to": [
+          22,
+          0
+        ]
+      },
+      {
+        "from": [
+          20,
+          4
+        ],
+        "to": [
+          19,
+          6
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "transistor",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "truthTable",
+      "inputs": [
+        "pad"
+      ],
+      "output": "led",
+      "expect": "and",
+      "live": true
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "transistor",
+      "pos": [
+        21,
+        3
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "transistor",
+        "pos": [
+          21,
+          3
+        ],
+        "rot": 0
+      },
+      {
+        "id": "pad",
+        "type": "touch",
+        "pos": [
+          21,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": []
+  }
+}

@@ -120,7 +120,7 @@ function led(scene: Phaser.Scene, key: string, dome: number, light: number, rim:
 }
 
 /** Resistor values that have their own texture (others use the nearest). */
-export const RESISTOR_VALUES = [47, 100, 220, 470, 1000];
+export const RESISTOR_VALUES = [47, 100, 220, 470, 1000, 10000, 22000];
 
 /** Colour-code digits: 0 black, 1 brown, 2 red, 4 yellow, 7 violet (approximated with the palette). */
 const DIGIT_COLORS: Record<number, number> = {
@@ -237,6 +237,53 @@ function buzzer(scene: Phaser.Scene): void {
   w.addTo(scene, 'icon-wave');
 }
 
+/** NPN transistor seen from above: the D-shaped black body with three legs (E, B, C). */
+function transistor(scene: Phaser.Scene): void {
+  const p = new Px(partWidth(2), 16);
+  const cx = p.w / 2;
+  // Three legs, the middle one (base) in the centre hole.
+  for (const x of [4, cx, p.w - 4]) {
+    p.rect(x - 1, 8, 2, 6, PAL.silver).rect(x - 2, 6, 4, 4, PAL.slate).rect(x - 1, 7, 2, 2, PAL.white);
+  }
+  p.rect(4, 11, p.w - 8, 2, PAL.silver);
+  // Body: flat side at the bottom, round at the top.
+  p.disc(cx, 8, 8, PAL.ink).clear(0, 9, p.w, 7);
+  p.rect(cx - 8, 8, 16, 2, PAL.ink);
+  p.disc(cx - 1, 7, 6.5, PAL.charcoal).clear(0, 9, p.w, 7);
+  p.rect(cx - 7, 8, 14, 1, PAL.charcoal);
+  p.px(cx - 4, 3, PAL.slate).px(cx - 3, 2, PAL.slate);
+  // Re-draw the legs below the flat face.
+  for (const x of [4, cx, p.w - 4]) p.rect(x - 1, 10, 2, 3, PAL.silver).rect(x - 2, 6, 4, 4, PAL.slate).rect(x - 1, 7, 2, 2, PAL.white);
+  // A tiny arrow on the emitter side, like the circuit symbol.
+  p.rect(cx - 5, 5, 2, 1, PAL.white).px(cx - 4, 4, PAL.white);
+  p.addTo(scene, 'part-transistor');
+}
+
+/** Light sensor (LDR): a reddish disc with the wiggly light-sensitive track. */
+function ldr(scene: Phaser.Scene): void {
+  const p = new Px(partWidth(2), 16);
+  const cx = p.w / 2;
+  leads(p, 2, cx - 6, cx + 6);
+  p.disc(cx, 8, 6.5, PAL.plum).disc(cx - 0.5, 7.5, 5.5, PAL.orange);
+  p.map(cx - 4, 4, ['x.xxx.x', 'x.x.x.x', 'xxx.xxx', 'x.x.x.x', 'x.xxx.x', '.......', '.......'], { x: PAL.red });
+  p.px(cx - 3, 3, PAL.yellow).px(cx - 2, 3, PAL.yellow);
+  p.addTo(scene, 'part-ldr');
+}
+
+/** Touch pad: two interleaved metal combs. A finger across them closes the gap a tiny bit. */
+function touchPad(scene: Phaser.Scene): void {
+  const p = new Px(partWidth(2), 16);
+  const cx = p.w / 2;
+  leads(p, 2, cx - 7, cx + 7);
+  p.rect(cx - 7, 1, 14, 14, PAL.navy).rect(cx - 7, 1, 14, 1, PAL.blue);
+  for (let i = 0; i < 4; i++) {
+    p.rect(cx - 6, 3 + i * 3, 9, 1, PAL.silver);
+    p.rect(cx - 3, 4 + i * 3, 9, 1, PAL.yellow);
+  }
+  p.rect(cx - 6, 3, 1, 10, PAL.silver).rect(cx + 5, 4, 1, 10, PAL.yellow);
+  p.addTo(scene, 'part-touch');
+}
+
 function pot(scene: Phaser.Scene): void {
   const span = PART_DEFS.pot.span;
   const p = new Px(partWidth(span), 16);
@@ -298,9 +345,48 @@ function boardPanel(scene: Phaser.Scene, cols: number, rows: number): string {
   return key;
 }
 
+/**
+ * A breadboard: cream plastic, a red line along the + rail (top), a blue line
+ * along the − rail (bottom), and a groove down the middle channel.
+ * Holes only where the breadboard has them (see holeAt).
+ */
+function breadboardPanel(scene: Phaser.Scene, cols: number, rows: number): string {
+  const key = `breadboard-${cols}x${rows}`;
+  if (scene.textures.exists(key)) return key;
+  const pad = 12;
+  const w = (cols - 1) * CELL + pad * 2;
+  const h = (rows - 1) * CELL + pad * 2;
+  const rowY = (r: number) => pad + r * CELL;
+  const p = new Px(w + 2, h + 3);
+  p.rect(2, 3, w, h, PAL.ink, 0.5);
+  p.rect(0, 0, w, h, PAL.white);
+  p.rect(0, h - 2, w, 2, PAL.silver).rect(w - 1, 0, 1, h, PAL.silver);
+  p.clear(0, 0, 1, 1).clear(w - 1, 0, 1, 1).clear(0, h - 1, 1, 1).clear(w - 1, h - 1, 1, 1);
+  // Rails: a slightly darker band with a coloured line on the inside edge.
+  p.rect(2, rowY(0) - 6, w - 4, 12, PAL.silver, 0.25).rect(2, rowY(0) + 7, w - 4, 1, PAL.red);
+  p.rect(2, rowY(rows - 1) - 6, w - 4, 12, PAL.silver, 0.25).rect(2, rowY(rows - 1) - 8, w - 4, 1, PAL.blue);
+  // + and − signs at both ends of the rails.
+  for (const x of [4, w - 9]) {
+    p.rect(x, rowY(0) - 1, 5, 1, PAL.red).rect(x + 2, rowY(0) - 3, 1, 5, PAL.red);
+    p.rect(x, rowY(rows - 1), 5, 1, PAL.blue);
+  }
+  // Middle channel.
+  p.rect(2, rowY(5) - 3, w - 4, 6, PAL.silver).rect(2, rowY(5) - 3, w - 4, 1, PAL.slate);
+  const holeRows = Array.from({ length: rows }, (_, r) => r).filter((r) => ![1, 5, 9].includes(r));
+  for (const j of holeRows) {
+    for (let i = 0; i < cols; i++) {
+      const x = pad + i * CELL - 2;
+      const y = rowY(j) - 2;
+      p.rect(x, y, 4, 4, PAL.slate).rect(x, y, 4, 1, PAL.charcoal).rect(x, y, 1, 4, PAL.charcoal);
+    }
+  }
+  p.addTo(scene, key);
+  return key;
+}
+
 /** Board panel texture key for the given size (created on first use). Top-left hole is at (12,12). */
-export function ensureBoardTexture(scene: Phaser.Scene, cols: number, rows: number): string {
-  return boardPanel(scene, cols, rows);
+export function ensureBoardTexture(scene: Phaser.Scene, cols: number, rows: number, kind: 'magic' | 'breadboard' = 'magic'): string {
+  return kind === 'breadboard' ? breadboardPanel(scene, cols, rows) : boardPanel(scene, cols, rows);
 }
 
 const ICONS: Record<string, string[]> = {
@@ -425,6 +511,43 @@ const ICONS: Record<string, string[]> = {
     '............',
     'xxxxxxxxxxxx',
     'xxxxxxxxxxxx',
+  ],
+  eye: [
+    '............',
+    '....xxxx....',
+    '..xx....xx..',
+    '.x...xx...x.',
+    'x...xxxx...x',
+    'x...xxxx...x',
+    '.x...xx...x.',
+    '..xx....xx..',
+    '....xxxx....',
+    '............',
+  ],
+  sun: [
+    '.....x......',
+    '.x...x...x..',
+    '..x.....x...',
+    '....xxx.....',
+    '...xxxxx....',
+    'xx.xxxxx.xx.',
+    '...xxxxx....',
+    '....xxx.....',
+    '..x.....x...',
+    '.x...x...x..',
+    '.....x......',
+  ],
+  moon: [
+    '...xxxx...',
+    '..xxx.....',
+    '.xxx......',
+    'xxxx......',
+    'xxxx......',
+    'xxxx......',
+    'xxxxx.....',
+    '.xxxxx...x',
+    '..xxxxxxx.',
+    '....xxx...',
   ],
   check: [
     '..........x',
@@ -551,6 +674,9 @@ export function createTextures(scene: Phaser.Scene): void {
   fan(scene);
   buzzer(scene);
   pot(scene);
+  transistor(scene);
+  ldr(scene);
+  touchPad(scene);
   switchPart(scene, false);
   switchPart(scene, true);
   const shades: Record<LedColor, [number, number, number, number]> = {

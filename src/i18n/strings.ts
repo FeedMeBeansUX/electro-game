@@ -20,6 +20,8 @@ export const STRINGS = {
   world1: { nl: 'Wereld 1: Licht aan!', en: 'World 1: Lights on!' },
   world2: { nl: 'Wereld 2: Knopjes en schakelaars', en: 'World 2: Buttons and switches' },
   world3: { nl: 'Wereld 3: Meer aan de stroom', en: 'World 3: More things to power' },
+  world4: { nl: 'Wereld 4: Het echte breadboard', en: 'World 4: The real breadboard' },
+  world5: { nl: 'Wereld 5: De toverschakelaar', en: 'World 5: The magic switch' },
   myLevels: { nl: 'Mijn levels', en: 'My levels' },
 
   // Level editor (parent corner)
@@ -62,6 +64,9 @@ export const STRINGS = {
   partFan: { nl: 'Ventilator', en: 'Fan' },
   partBuzzer: { nl: 'Zoemer', en: 'Buzzer' },
   partPot: { nl: 'Draaiknop', en: 'Potentiometer' },
+  partTransistor: { nl: 'Transistor', en: 'Transistor' },
+  partLdr: { nl: 'Lichtsensor', en: 'Light sensor' },
+  partTouch: { nl: 'Aanraakknop', en: 'Touch pad' },
 
   // Spoken feedback
   sayWireHowTo: {
@@ -127,6 +132,21 @@ export const STRINGS = {
   sayHintKnob: {
     nl: 'Tik op de draaiknop om eraan te draaien.',
     en: 'Tap the knob to turn it.',
+  },
+  sayXray: {
+    nl: 'Kijk! Onder het bord zitten geheime tunnels. Gaatjes in hetzelfde rijtje zijn met elkaar verbonden.',
+    en: 'Look! There are secret tunnels under the board. Holes in the same little row are connected.',
+  },
+  sayNight: { nl: 'Het is nacht. Welterusten!', en: "It's night. Sleep tight!" },
+  sayTransistorTurn: {
+    nl: 'De transistor zit verkeerd om. Tik erop om hem te draaien.',
+    en: 'The transistor is the wrong way round. Tap it to turn it.',
+  },
+  sayHintNight: { nl: 'Tik op de zon om het nacht te maken.', en: 'Tap the sun to make it night.' },
+  sayDay: { nl: 'Goedemorgen! De zon is op.', en: 'Good morning! The sun is up.' },
+  saySameStrip: {
+    nl: 'Oei, allebei de pootjes zitten in hetzelfde rijtje. Dan gaat de stroom eromheen.',
+    en: 'Oops, both legs are in the same little row. Then the current goes around it.',
   },
   sayAllDone: {
     nl: 'Super! Je hebt alle levels van deze wereld gedaan.',

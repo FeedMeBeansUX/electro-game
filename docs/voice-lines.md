@@ -33,6 +33,12 @@ Tips: trim the silence at the start and end, and keep the volume about the same 
 | `sayHintSwitch.mp3` | Tik op de schakelaar om hem aan te zetten. | Tap the switch to turn it on. |
 | `sayHintPress.mp3` | Druk op de knop en houd hem vast. | Press the button and hold it down. |
 | `sayHintKnob.mp3` | Tik op de draaiknop om eraan te draaien. | Tap the knob to turn it. |
+| `sayXray.mp3` | Kijk! Onder het bord zitten geheime tunnels. Gaatjes in hetzelfde rijtje zijn met elkaar verbonden. | Look! There are secret tunnels under the board. Holes in the same little row are connected. |
+| `sayNight.mp3` | Het is nacht. Welterusten! | It's night. Sleep tight! |
+| `sayTransistorTurn.mp3` | De transistor zit verkeerd om. Tik erop om hem te draaien. | The transistor is the wrong way round. Tap it to turn it. |
+| `sayHintNight.mp3` | Tik op de zon om het nacht te maken. | Tap the sun to make it night. |
+| `sayDay.mp3` | Goedemorgen! De zon is op. | Good morning! The sun is up. |
+| `saySameStrip.mp3` | Oei, allebei de pootjes zitten in hetzelfde rijtje. Dan gaat de stroom eromheen. | Oops, both legs are in the same little row. Then the current goes around it. |
 | `sayAllDone.mp3` | Super! Je hebt alle levels van deze wereld gedaan. | Great! You finished all the levels in this world. |
 
 ## Level introductions
@@ -55,3 +61,13 @@ Tips: trim the silence at the start and end, and keep the volume about the same 
 | `w3-l3-intro.mp3` | Het is bedtijd. Maak een zacht nachtlampje: niet te fel! Welke drempel kies je? | It's bedtime. Make a soft night light: not too bright! Which speed bump do you pick? |
 | `w3-l4-intro.mp3` | Tik op de draaiknop. Kun je het lampje zo fel mogelijk maken? | Tap the knob. Can you make the light as bright as it can go? |
 | `w3-l5-intro.mp3` | Bouw een slaapkamerlamp met een schakelaar en een draaiknop. Zet hem aan en maak het licht gezellig zacht. | Build a bedroom lamp with a switch and a knob. Turn it on and make the light nice and soft. |
+| `w4-l1-intro.mp3` | Dit is een echt breadboard! Onder het bord zitten geheime tunnels: de gaatjes in hetzelfde rijtje van drie zijn verbonden. Zet het lampje over twee rijtjes. | This is a real breadboard! Under the board are secret tunnels: the holes in the same little row of three are connected. Put the light across two little rows. |
+| `w4-l2-intro.mp3` | Bouw het lampje van wereld 1 nu zelf op het breadboard: een weerstand vanaf de plus-rail, een lampje, en een draadje naar de min-rail. | Now build the light from world 1 on the breadboard: a resistor from the plus rail, a light, and a wire to the minus rail. |
+| `w4-l3-intro.mp3` | Bovenaan zit de plus-rail en onderaan de min-rail. Verbind de lampjes met de rails, dan krijgen ze allebei stroom. | The plus rail is at the top and the minus rail at the bottom. Connect the lights to the rails so they both get power. |
+| `w4-l4-intro.mp3` | Er klopt iets niet: het lampje brandt niet! Kijk met de röntgenogen (het oog) en zoek de fout. | Something's wrong: the light won't shine! Look with the X-ray eyes (the eye button) and find the mistake. |
+| `w4-l5-intro.mp3` | Bouw de slaapkamerlamp nu op het breadboard: schakelaar, draaiknop en lampje. Zet hem aan en maak het licht gezellig zacht. | Now build the bedroom lamp on the breadboard: switch, knob and light. Turn it on and make the light nice and soft. |
+| `w5-l1-intro.mp3` | Een transistor is een toverschakelaar: een klein stroompje in het middelste pootje zet een grote stroom aan. Zet de transistor erin en druk op de knop! | A transistor is a magic switch: a tiny current in its middle leg turns on a big current. Put the transistor in and press the button! |
+| `w5-l2-intro.mp3` | Het middelste pootje van de transistor heet de basis. Verbind de basis met de weerstand: dan laat een heel klein stroompje het lampje branden. | The middle leg of the transistor is called the base. Connect the base to the resistor: then a tiny current makes the light shine. |
+| `w5-l3-intro.mp3` | Dit is een lichtsensor: hoe meer licht, hoe meer stroom hij doorlaat. Zet hem erin. Leg daarna je vinger erop, of maak het nacht met de zon-knop! | This is a light sensor: the more light, the more current it lets through. Put it in. Then cover it with your finger, or make it night with the sun button! |
+| `w5-l4-intro.mp3` | Maak een nachtlampje dat vanzelf aangaat als het donker wordt! Zet de lichtsensor en de transistor erin, en maak het dan nacht. | Make a night light that turns on by itself when it gets dark! Put in the light sensor and the transistor, then make it night. |
+| `w5-l5-intro.mp3` | Maak een aanraakknop! Een vinger laat maar een heel klein stroompje door. Eén transistor is niet genoeg: zet er een tweede bij, dan helpen ze elkaar. | Make a touch switch! A finger lets only a tiny current through. One transistor isn't enough: add a second one so they help each other. |

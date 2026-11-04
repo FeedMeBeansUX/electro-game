@@ -98,3 +98,40 @@ describe('brightness goals', () => {
     expect(checkGoal({ kind: 'ledOn', count: 1 }, evaluateBoard(b))).toBe(true);
   });
 });
+
+describe('light goals', () => {
+  const goal = { kind: 'lightResponse' as const, outputType: 'led' as const, onWhen: 'dark' as const };
+
+  it('a night light passes "on in the dark", a plain lamp does not', () => {
+    // Breadboard night light:
+    //   10 kΩ from the + rail to top strip 6 (the base line), wired over to the base (13,3)
+    //   light sensor from top strip 6 down to bottom strip 6, wired to the − rail
+    //   100 Ω from the + rail to top strip 10, LED from strip 10 to strip 8, wired to the collector (14,3)
+    //   transistor E (12,3) B (13,3) C (14,3); emitter strip wired to the − rail
+    const night: Board = {
+      cols: 24,
+      rows: 11,
+      kind: 'breadboard',
+      supply: 3,
+      parts: [
+        part('rb', 'resistor', 6, 1, 1, { resistance: 10000 }),
+        part('ldr', 'ldr', 6, 5, 1),
+        part('rl', 'resistor', 10, 1, 1, { resistance: 100 }),
+        part('led', 'led', 9, 3, 2),
+        part('q', 'transistor', 13, 3, 0),
+      ],
+      wires: [wire('g', 6, 8, 6, 10), wire('b', 6, 2, 13, 2), wire('c', 8, 4, 14, 4), wire('e', 12, 4, 12, 10)],
+    };
+    expect(checkGoal(goal, evaluateBoard(night), night)).toBe(true);
+
+    const lamp: Board = {
+      cols: 24,
+      rows: 11,
+      kind: 'breadboard',
+      supply: 3,
+      parts: [part('rl', 'resistor', 10, 1, 1, { resistance: 100 }), part('led', 'led', 9, 3, 2)],
+      wires: [wire('k', 8, 4, 8, 10)],
+    };
+    expect(checkGoal(goal, evaluateBoard(lamp), lamp)).toBe(false);
+  });
+});

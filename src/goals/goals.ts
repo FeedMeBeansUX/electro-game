@@ -49,7 +49,19 @@ export interface TruthTableGoal {
   live?: boolean;
 }
 
-export type Goal = LedOnGoal | FanGoal | BuzzerGoal | TruthTableGoal;
+/**
+ * The output must react to light: on in the dark and off in daylight (a night
+ * light), or the other way round. With `live` it must also be on right now.
+ */
+export interface LightGoal {
+  kind: 'lightResponse';
+  output?: string;
+  outputType?: PartType;
+  onWhen: 'dark' | 'light';
+  live?: boolean;
+}
+
+export type Goal = LedOnGoal | FanGoal | BuzzerGoal | TruthTableGoal | LightGoal;
 
 export interface GoalStatus {
   done: boolean;
@@ -77,7 +89,7 @@ function expected(goal: TruthTableGoal, combo: number): boolean {
   return goal.expect === 'and' ? bits.every(Boolean) : bits.some(Boolean);
 }
 
-function outputActive(goal: TruthTableGoal, ev: BoardEval, board: Board): boolean {
+function outputActive(goal: TruthTableGoal | LightGoal, ev: BoardEval, board: Board): boolean {
   if (goal.output !== undefined) return isActive(ev, goal.output);
   return board.parts.some((p) => p.type === goal.outputType && isActive(ev, p.id));
 }
@@ -93,6 +105,19 @@ function checkTruthTable(goal: TruthTableGoal, ev: BoardEval, board: Board): boo
     });
     const e = evaluateBoard(b);
     if (e.shorted || outputActive(goal, e, b) !== expected(goal, combo)) return false;
+  }
+  return true;
+}
+
+function checkLight(goal: LightGoal, ev: BoardEval, board: Board): boolean {
+  if (goal.live && !outputActive(goal, ev, board)) return false;
+  for (const light of [1, 0]) {
+    const b = cloneBoard(board);
+    b.light = light;
+    for (const p of b.parts) if (p.type === 'ldr') p.props.covered = false;
+    const e = evaluateBoard(b);
+    const shouldBeOn = goal.onWhen === 'dark' ? light === 0 : light === 1;
+    if (e.shorted || outputActive(goal, e, b) !== shouldBeOn) return false;
   }
   return true;
 }
@@ -123,6 +148,8 @@ export function checkGoal(goal: Goal, ev: BoardEval, board?: Board): boolean {
       });
     case 'truthTable':
       return board !== undefined && checkTruthTable(goal, ev, board);
+    case 'lightResponse':
+      return board !== undefined && checkLight(goal, ev, board);
   }
 }
 

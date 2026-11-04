@@ -1,0 +1,128 @@
+{
+  "id": "w4-l5",
+  "world": 4,
+  "index": 5,
+  "title": {
+    "nl": "De lamp op het breadboard",
+    "en": "The lamp on the breadboard"
+  },
+  "intro": {
+    "nl": "Bouw de slaapkamerlamp nu op het breadboard: schakelaar, draaiknop en lampje. Zet hem aan en maak het licht gezellig zacht.",
+    "en": "Now build the bedroom lamp on the breadboard: switch, knob and light. Turn it on and make the light nice and soft."
+  },
+  "parentNote": {
+    "nl": "Een echte schakeling met drie onderdelen, gebouwd zoals elektronici het doen.",
+    "en": "A real circuit with three parts, built the way electronics people do it."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [],
+    "wires": [
+      {
+        "from": [
+          9,
+          3
+        ],
+        "to": [
+          9,
+          10
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "switch",
+      "count": 1
+    },
+    {
+      "type": "pot",
+      "count": 1
+    },
+    {
+      "type": "led",
+      "count": 1,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "minBrightness": 0.15,
+      "maxBrightness": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "switch",
+      "pos": [
+        5,
+        1
+      ],
+      "rot": 1
+    },
+    {
+      "type": "pot",
+      "pos": [
+        6,
+        3
+      ],
+      "rot": 0
+    },
+    {
+      "type": "led",
+      "pos": [
+        8,
+        4
+      ],
+      "rot": 0,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "switch",
+        "pos": [
+          5,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "closed": true
+        }
+      },
+      {
+        "type": "pot",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "knob": 0.5
+        }
+      },
+      {
+        "type": "led",
+        "pos": [
+          8,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": []
+  }
+}

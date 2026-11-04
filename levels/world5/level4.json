@@ -1,0 +1,153 @@
+{
+  "id": "w5-l4",
+  "world": 5,
+  "index": 4,
+  "title": {
+    "nl": "Het nachtlampje",
+    "en": "The night light"
+  },
+  "intro": {
+    "nl": "Maak een nachtlampje dat vanzelf aangaat als het donker wordt! Zet de lichtsensor en de transistor erin, en maak het dan nacht.",
+    "en": "Make a night light that turns on by itself when it gets dark! Put in the light sensor and the transistor, then make it night."
+  },
+  "parentNote": {
+    "nl": "In het licht trekt de lichtsensor de basis omlaag, dus de transistor staat uit. In het donker krijgt de basis stroom en gaat het lampje aan.",
+    "en": "In the light the sensor pulls the base down, so the transistor is off. In the dark the base gets current and the LED turns on."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "dayNight": true,
+  "fixed": {
+    "parts": [
+      {
+        "id": "rl",
+        "type": "resistor",
+        "pos": [
+          14,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "id": "rb",
+        "type": "resistor",
+        "pos": [
+          13,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 10000
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          14,
+          5
+        ],
+        "rot": 1,
+        "props": {
+          "color": "yellow"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          13,
+          4
+        ],
+        "to": [
+          13,
+          6
+        ]
+      },
+      {
+        "from": [
+          12,
+          8
+        ],
+        "to": [
+          12,
+          10
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          11,
+          10
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "ldr",
+      "count": 1
+    },
+    {
+      "type": "transistor",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "lightResponse",
+      "output": "led",
+      "onWhen": "dark",
+      "live": true
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "ldr",
+      "pos": [
+        12,
+        3
+      ],
+      "rot": 0
+    },
+    {
+      "type": "transistor",
+      "pos": [
+        13,
+        7
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "ldr",
+        "pos": [
+          12,
+          3
+        ],
+        "rot": 0
+      },
+      {
+        "type": "transistor",
+        "pos": [
+          13,
+          7
+        ],
+        "rot": 0
+      }
+    ],
+    "wires": [],
+    "light": 0
+  }
+}

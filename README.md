@@ -28,6 +28,7 @@ Add `?level=N` to the URL to jump straight into level N.
 - **Move a wire end:** drag the end of a wire you placed. Drop it on the tray to take the wire back.
 - **Place a part:** drag it from the tray onto the board. Drag it back to the tray to remove it.
 - **Turn a part:** tap it. Parts also turn themselves when dropped, if that connects them to the wires.
+- **Breadboard levels (World 4 and 5):** the eye button shows the hidden strips under the board ("X-ray"). Hold a finger on a light sensor to cover it, or use the sun/moon button to make it night. Hold a touch pad to touch it.
 - **Switches, buttons and knobs:** tap a switch to flip it, hold a push button down, tap the knob to turn it a step. This still works after a level is done, so he can keep playing with it.
 - **Hear the task again:** the speaker button.
 - **Stuck?** Vonkje, the spark, helps after a while: first pointing, then showing how, and finally doing one step.
@@ -80,4 +81,6 @@ tests/        Vitest unit tests
 
 Each level is a JSON file in `levels/worldN/`. It lists the fixed parts and wires, any movable pre-placed parts, the player's inventory, the goals, a note for the parent, and one known `solution`.
 
-Goal types: `ledOn` (optionally `minBrightness`, `maxBrightness`, `count`), `fanSpinning`, `buzzerOn`, and `truthTable` (an output that must follow switches or buttons as AND, OR or a custom table; with `live` the child also has to try it). The test suite checks that every level is unsolved at the start and solved by its solution, so a broken level fails CI. The hint system uses the same solution to show the next step.
+Goal types: `ledOn` (optionally `minBrightness`, `maxBrightness`, `count`), `fanSpinning`, `buzzerOn`, `truthTable` (an output that must follow switches or buttons as AND, OR or a custom table; with `live` the child also has to try it), and `lightResponse` (an output that must be on only in the dark, or only in the light).
+
+Breadboard levels set `"board": "breadboard"` and `"supply": 3` (the rails' battery) on a 24×11 board: row 0 is the + rail, rows 2–4 and 6–8 are 3-hole strips, row 10 is the − rail. `"xray": true` shows the strips from the start, `"dayNight": true` adds the day/night button, and a solution can end with `"light": 0` (night). The test suite checks that every level is unsolved at the start and solved by its solution, so a broken level fails CI. The hint system uses the same solution to show the next step.

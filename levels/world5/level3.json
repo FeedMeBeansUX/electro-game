@@ -1,0 +1,88 @@
+{
+  "id": "w5-l3",
+  "world": 5,
+  "index": 3,
+  "title": {
+    "nl": "De lichtsensor",
+    "en": "The light sensor"
+  },
+  "intro": {
+    "nl": "Dit is een lichtsensor: hoe meer licht, hoe meer stroom hij doorlaat. Zet hem erin. Leg daarna je vinger erop, of maak het nacht met de zon-knop!",
+    "en": "This is a light sensor: the more light, the more current it lets through. Put it in. Then cover it with your finger, or make it night with the sun button!"
+  },
+  "parentNote": {
+    "nl": "Een LDR (lichtgevoelige weerstand) heeft veel weerstand in het donker en weinig in het licht.",
+    "en": "An LDR (light-dependent resistor) has high resistance in the dark and low resistance in the light."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "dayNight": true,
+  "fixed": {
+    "parts": [
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          7,
+          4
+        ],
+        "to": [
+          7,
+          10
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "ldr",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "lightResponse",
+      "output": "led",
+      "onWhen": "light",
+      "live": true
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "ldr",
+      "pos": [
+        5,
+        1
+      ],
+      "rot": 1
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "ldr",
+        "pos": [
+          5,
+          1
+        ],
+        "rot": 1
+      }
+    ],
+    "wires": []
+  }
+}

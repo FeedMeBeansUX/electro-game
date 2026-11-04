@@ -37,7 +37,23 @@ export interface SwitchEl {
   closed: boolean;
 }
 
-export type Element = ResistorEl | BatteryEl | DiodeEl | SwitchEl;
+/** NPN transistor (Ebers–Moll transport model). */
+export interface BjtEl {
+  kind: 'bjt';
+  id: string;
+  c: number;
+  b: number;
+  e: number;
+  /** Saturation current (A). */
+  is: number;
+  /** Forward and reverse current gain. */
+  bf: number;
+  br: number;
+  /** Thermal voltage (V). */
+  vt: number;
+}
+
+export type Element = ResistorEl | BatteryEl | DiodeEl | SwitchEl | BjtEl;
 
 export interface Circuit {
   nodeCount: number;
@@ -51,3 +67,6 @@ export function diodeModel(forwardVolts: number, atAmps = 0.01, n = 2): { is: nu
   const nvt = n * THERMAL_VOLTAGE;
   return { is: atAmps / Math.exp(forwardVolts / nvt), nvt };
 }
+
+/** A small general-purpose NPN transistor (like a 2N3904 or BC547). */
+export const NPN_MODEL = { is: 1e-14, bf: 100, br: 1, vt: THERMAL_VOLTAGE };

@@ -1,7 +1,7 @@
-import { pinCells, wireEnds, type Board } from '../board/board';
-import { cellKey, type Cell } from '../board/grid';
-import { potOhms, type LedColor } from '../parts/defs';
-import { diodeModel, type Circuit, type Element } from './circuit';
+import { netKey, pinCells, wireEnds, type Board } from '../board/board';
+import type { Cell } from '../board/grid';
+import { SKIN_OHMS, ldrOhms, potOhms, type LedColor } from '../parts/defs';
+import { NPN_MODEL, diodeModel, type Circuit, type Element } from './circuit';
 
 /** Wires are tiny resistors so their current can be read for the current-dot animation. */
 export const WIRE_OHMS = 0.01;
@@ -22,19 +22,22 @@ export const LED_FORWARD_VOLTS: Record<LedColor, number> = {
 
 export interface Netlist {
   circuit: Circuit;
-  /** Node index for each hole that has a connection (key: cellKey). */
+  /** Node index per connection (key: netKey of a hole). */
   nodeOfCell: Map<string, number>;
 }
 
+/** Id of the built-in battery that feeds a breadboard's rails. */
+export const SUPPLY_ID = 'supply';
+
 /**
- * "Magic board" netlist: every hole is its own connection point, so each hole
- * holding a pin or a wire end becomes one node. Parts listed in `excluded`
- * (e.g. a popped LED, or a part being dragged) are left out.
+ * Builds the circuit. On a magic board every hole is its own node; on a
+ * breadboard all holes of a strip or rail share one (see netKey). Parts listed
+ * in `excluded` (e.g. a popped LED, or a part being dragged) are left out.
  */
 export function buildNetlist(board: Board, excluded: ReadonlySet<string> = new Set()): Netlist {
   const nodeOfCell = new Map<string, number>();
   const node = (c: Cell): number => {
-    const k = cellKey(c);
+    const k = netKey(board, c);
     let id = nodeOfCell.get(k);
     if (id === undefined) {
       id = nodeOfCell.size;
@@ -53,11 +56,22 @@ export function buildNetlist(board: Board, excluded: ReadonlySet<string> = new S
   };
 
   const elements: Element[] = [];
+  if (board.kind === 'breadboard' && board.supply) {
+    elements.push({
+      kind: 'battery',
+      id: SUPPLY_ID,
+      pos: node({ x: 0, y: 0 }),
+      neg: node({ x: 0, y: board.rows - 1 }),
+      volts: board.supply,
+      internalOhms: BATTERY_INTERNAL_OHMS,
+    });
+  }
+  const light = board.light ?? 1;
   for (const p of board.parts) {
     if (excluded.has(p.id)) continue;
-    const [c0, c1] = pinCells(p);
-    const n0 = node(c0);
-    const n1 = node(c1);
+    const pins = pinCells(p);
+    const n0 = node(pins[0]);
+    const n1 = node(pins[pins.length - 1]);
     switch (p.type) {
       case 'battery':
         elements.push({
@@ -86,6 +100,16 @@ export function buildNetlist(board: Board, excluded: ReadonlySet<string> = new S
         break;
       case 'pot':
         elements.push({ kind: 'resistor', id: p.id, a: n0, b: n1, ohms: potOhms(p.props.knob ?? 0) });
+        break;
+      case 'transistor':
+        elements.push({ kind: 'bjt', id: p.id, e: n0, b: node(pins[1]), c: n1, ...NPN_MODEL });
+        break;
+      case 'ldr':
+        elements.push({ kind: 'resistor', id: p.id, a: n0, b: n1, ohms: ldrOhms(p.props.covered ? 0 : light) });
+        break;
+      case 'touch':
+        // A finger across the pads conducts a tiny bit; untouched, the gap doesn't conduct at all.
+        if (p.props.closed) elements.push({ kind: 'resistor', id: p.id, a: n0, b: n1, ohms: SKIN_OHMS });
         break;
       case 'buzzer': {
         // The diode carries the buzzer's id, so its current is the buzzer current.

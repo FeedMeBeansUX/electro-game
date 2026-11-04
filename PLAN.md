@@ -214,15 +214,17 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 
 ### Phase 4: Real breadboard + semiconductors (≈4–6 weeks)
 **Goal:** teach real breadboard connectivity, transistors and sensors.
-- [ ] Breadboard board type: strips, center gap, power rails, and an "X-ray" toggle that shows hidden connections.
-- [ ] Multi-pin parts that straddle the center gap correctly.
-- [ ] **Simulator v2:** NPN transistor model with robust Newton–Raphson convergence (damping, gmin stepping, and a fallback to a switch model if the solve doesn't converge).
-- [ ] LDR (light sensor) tied to an in-game light level (day/night toggle, cover with finger).
-- [ ] Touch pads (simulated skin resistance).
-- [ ] World 4 and World 5 levels.
-- [ ] Convergence and stress tests (randomized circuits must never freeze the game: cap the iterations and degrade gracefully).
+- [x] Breadboard board type: strips, center gap, power rails, and an "X-ray" toggle that shows hidden connections. *The game's breadboard uses 3-hole strips instead of 5, so it fits on screen at the normal hole size; a built-in battery feeds the rails.*
+- [x] Multi-pin parts that straddle the center gap correctly (the transistor has three legs).
+- [x] **Simulator v2:** NPN transistor model with robust Newton–Raphson convergence. *Built as: Ebers–Moll transistor with junction-voltage limiting, one ground anchor per group of connected parts (this fixed a real precision problem with floating circuits), and source stepping (ramping the battery up) as the fallback.*
+- [x] LDR (light sensor) tied to an in-game light level (day/night toggle, cover with finger).
+- [x] Touch pads (simulated skin resistance, 1 MΩ).
+- [x] World 4 and World 5 levels (5 each).
+- [x] Convergence and stress tests (randomized circuits must never freeze the game: cap the iterations and degrade gracefully). *300 random circuits: all give finite numbers, more than 98% converge.*
 
 **Exit criteria:** the night light and touch switch levels work reliably, and the simulator never hangs on random junk circuits.
+
+**Status:** built and played through in a browser; 182 tests green. Vonkje also warns when a transistor is in backwards or both legs of a part stand in the same strip.
 
 ### Phase 5: Time & sound: the interactive projects (≈5–7 weeks)
 **Goal:** make the "real, usable circuit" levels.

@@ -1,0 +1,95 @@
+{
+  "id": "w4-l1",
+  "world": 4,
+  "index": 1,
+  "title": {
+    "nl": "Geheime tunnels",
+    "en": "Secret tunnels"
+  },
+  "intro": {
+    "nl": "Dit is een echt breadboard! Onder het bord zitten geheime tunnels: de gaatjes in hetzelfde rijtje van drie zijn verbonden. Zet het lampje over twee rijtjes.",
+    "en": "This is a real breadboard! Under the board are secret tunnels: the holes in the same little row of three are connected. Put the light across two little rows."
+  },
+  "parentNote": {
+    "nl": "Op een breadboard zijn de gaatjes per rijtje verbonden. Zo heb je minder draadjes nodig.",
+    "en": "On a breadboard the holes are connected in little rows, so you need fewer wires."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "xray": true,
+  "fixed": {
+    "parts": [
+      {
+        "id": "r",
+        "type": "resistor",
+        "pos": [
+          5,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          7,
+          4
+        ],
+        "to": [
+          7,
+          10
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "led",
+      "count": 1,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "minBrightness": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "led",
+      "pos": [
+        6,
+        3
+      ],
+      "rot": 0,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "led",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": []
+  }
+}

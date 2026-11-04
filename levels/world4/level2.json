@@ -1,0 +1,90 @@
+{
+  "id": "w4-l2",
+  "world": 4,
+  "index": 2,
+  "title": {
+    "nl": "Bouw het opnieuw",
+    "en": "Build it again"
+  },
+  "intro": {
+    "nl": "Bouw het lampje van wereld 1 nu zelf op het breadboard: een weerstand vanaf de plus-rail, een lampje, en een draadje naar de min-rail.",
+    "en": "Now build the light from world 1 on the breadboard: a resistor from the plus rail, a light, and a wire to the minus rail."
+  },
+  "parentNote": {
+    "nl": "Dezelfde kring als in het eerste level, maar dan zoals je hem echt bouwt.",
+    "en": "The same circuit as the very first level, built the way you'd really build it."
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [],
+    "wires": []
+  },
+  "inventory": [
+    {
+      "type": "resistor",
+      "count": 1,
+      "props": {
+        "resistance": 100
+      }
+    },
+    {
+      "type": "led",
+      "count": 1,
+      "props": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "wire",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "resistor",
+        "pos": [
+          5,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "type": "led",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          7,
+          4
+        ],
+        "to": [
+          7,
+          10
+        ]
+      }
+    ]
+  }
+}

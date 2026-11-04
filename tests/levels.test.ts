@@ -88,3 +88,25 @@ describe('matchesItem', () => {
     expect(matchesItem({ type: 'wire', count: 1 }, part)).toBe(false);
   });
 });
+
+describe('w5-l4 night light', () => {
+  const level = LEVELS.find((l) => l.id === 'w5-l4')!;
+  const build = (rot: 0 | 2) => {
+    const board = buildLevelBoard(level);
+    board.parts.push(partFromSpec({ type: 'ldr', pos: [12, 3] }, 'ldr', false));
+    board.parts.push(partFromSpec({ type: 'transistor', pos: [13, 7], rot }, 'q', false));
+    board.light = 0;
+    return board;
+  };
+
+  it('lights the LED at night with the transistor the right way round', () => {
+    const ev = evaluateBoard(build(0));
+    const led = ev.parts.get('led')!;
+    expect(led.kind === 'led' && led.brightness).toBeGreaterThan(0.5);
+  });
+
+  it('shows a backwards transistor as current flowing the wrong way (so the game can say so)', () => {
+    const q = evaluateBoard(build(2)).parts.get('q')!;
+    expect(q.kind === 'transistor' && q.amps).toBeLessThan(-1e-4);
+  });
+});

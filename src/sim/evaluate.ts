@@ -1,6 +1,5 @@
-import { pinCells, type Board } from '../board/board';
-import { cellKey } from '../board/grid';
-import { buildNetlist } from './netlist';
+import { netKey, pinCells, type Board } from '../board/board';
+import { SUPPLY_ID, buildNetlist } from './netlist';
 import { solveDC } from './mna';
 
 /** LED current that counts as "fully bright". */
@@ -47,12 +46,22 @@ export interface BuzzerState {
   on: boolean;
 }
 
+export interface TransistorState {
+  kind: 'transistor';
+  /** Collector current (the big current it controls). */
+  amps: number;
+  /** Base current (the small current that controls it). */
+  baseAmps: number;
+  /** Conducting noticeably. */
+  on: boolean;
+}
+
 export interface PassiveState {
   kind: 'passive';
   amps: number;
 }
 
-export type PartState = LedState | BatteryState | FanState | BuzzerState | PassiveState;
+export type PartState = LedState | BatteryState | FanState | BuzzerState | TransistorState | PassiveState;
 
 export interface BoardEval {
   parts: Map<string, PartState>;
@@ -61,6 +70,8 @@ export interface BoardEval {
   shorted: boolean;
   popped: string[];
   converged: boolean;
+  /** Current out of a breadboard's built-in battery (0 without one). */
+  supplyAmps: number;
 }
 
 /**
@@ -99,7 +110,7 @@ export function evaluateBoard(board: Board, excluded: ReadonlySet<string> = new 
       let reversed = false;
       if (!isPopped && !excluded.has(p.id)) {
         // Voltage across the LED (anode minus cathode), read from its pin holes.
-        const [anode, cathode] = pinCells(p).map(cellKey);
+        const [anode, cathode] = pinCells(p).map((c) => netKey(board, c));
         reversed = voltageAt(anode) - voltageAt(cathode) < -LED_REVERSED_VOLTS;
       }
       parts.set(p.id, {
@@ -116,6 +127,13 @@ export function evaluateBoard(board: Board, excluded: ReadonlySet<string> = new 
     } else if (p.type === 'fan') {
       const mag = Math.abs(amps) < FAN_START_AMPS ? 0 : Math.min(1, Math.abs(amps) / FAN_FULL_AMPS);
       parts.set(p.id, { kind: 'fan', amps, speed: Math.sign(amps) * mag });
+    } else if (p.type === 'transistor') {
+      parts.set(p.id, {
+        kind: 'transistor',
+        amps,
+        baseAmps: excluded.has(p.id) ? 0 : result.currents.get(`${p.id}:b`) ?? 0,
+        on: amps > 0.001,
+      });
     } else if (p.type === 'buzzer') {
       parts.set(p.id, { kind: 'buzzer', amps, on: amps > BUZZER_ON_AMPS });
     } else {
@@ -123,8 +141,11 @@ export function evaluateBoard(board: Board, excluded: ReadonlySet<string> = new 
     }
   }
 
+  const supplyAmps = result.currents.get(SUPPLY_ID) ?? 0;
+  if (supplyAmps > SHORT_CIRCUIT_AMPS) shorted = true;
+
   const wires = new Map<string, number>();
   for (const w of board.wires) wires.set(w.id, excluded.has(w.id) ? 0 : result.currents.get(w.id) ?? 0);
 
-  return { parts, wires, shorted, popped: [...popped], converged: result.converged };
+  return { parts, wires, shorted, popped: [...popped], converged: result.converged, supplyAmps };
 }

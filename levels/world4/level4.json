@@ -1,0 +1,89 @@
+{
+  "id": "w4-l4",
+  "world": 4,
+  "index": 4,
+  "title": {
+    "nl": "Zoek de fout",
+    "en": "Find the mistake"
+  },
+  "intro": {
+    "nl": "Er klopt iets niet: het lampje brandt niet! Kijk met de röntgenogen (het oog) en zoek de fout.",
+    "en": "Something's wrong: the light won't shine! Look with the X-ray eyes (the eye button) and find the mistake."
+  },
+  "parentNote": {
+    "nl": "Als allebei de pootjes in hetzelfde rijtje zitten, gaat de stroom om het lampje heen. Dit is de meest gemaakte breadboardfout!",
+    "en": "With both legs in the same little row, the current goes around the LED. It's the most common breadboard mistake!"
+  },
+  "cols": 24,
+  "rows": 11,
+  "scale": 1,
+  "board": "breadboard",
+  "supply": 3,
+  "fixed": {
+    "parts": [
+      {
+        "id": "r",
+        "type": "resistor",
+        "pos": [
+          5,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          7,
+          4
+        ],
+        "to": [
+          7,
+          10
+        ]
+      }
+    ]
+  },
+  "placed": [
+    {
+      "id": "led",
+      "type": "led",
+      "pos": [
+        7,
+        3
+      ],
+      "rot": 1,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "inventory": [],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": []
+  }
+}

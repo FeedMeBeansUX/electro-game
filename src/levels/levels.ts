@@ -38,6 +38,14 @@ export interface LevelDef {
   rows: number;
   /** Pixel scale of the board (2 = big holes for the first levels). Defaults to 1. */
   scale?: number;
+  /** 'breadboard' for a real breadboard with hidden strips (11 rows); defaults to the magic board. */
+  board?: 'magic' | 'breadboard';
+  /** Volts of the battery built into a breadboard's power rails. */
+  supply?: number;
+  /** Show the hidden strips from the start (the "X-ray" view). */
+  xray?: boolean;
+  /** Show a day/night switch (for light sensor levels). */
+  dayNight?: boolean;
   fixed: { parts: LevelPartSpec[]; wires: LevelWireSpec[] };
   /** Parts already on the board that the player may move or turn (e.g. a backwards LED). */
   placed?: LevelPartSpec[];
@@ -51,7 +59,7 @@ export interface LevelDef {
    * to switch a fixed switch on). Used by the tests to prove the
    * level is solvable, and by the hint system to show the next step.
    */
-  solution: { parts: LevelPartSpec[]; wires: LevelWireSpec[] };
+  solution: { parts: LevelPartSpec[]; wires: LevelWireSpec[]; /** Room light to end with (0 = night). */ light?: number };
 }
 
 const modules = import.meta.glob('../../levels/**/*.json', { eager: true, import: 'default' });
@@ -81,6 +89,10 @@ export function wireFromSpec(board: Board, spec: LevelWireSpec, id: string, fixe
 /** The board as the level starts: only the level's fixed parts and wires. */
 export function buildLevelBoard(level: LevelDef): Board {
   const board: Board = { cols: level.cols, rows: level.rows, parts: [], wires: [] };
+  if (level.board === 'breadboard') {
+    board.kind = 'breadboard';
+    board.supply = level.supply ?? 3;
+  }
   level.fixed.parts.forEach((s, i) => board.parts.push(partFromSpec(s, `fixed-part-${i}`, true)));
   (level.placed ?? []).forEach((s, i) => board.parts.push(partFromSpec(s, `placed-part-${i}`, false)));
   level.fixed.wires.forEach((s, i) => board.wires.push(wireFromSpec(board, s, `fixed-wire-${i}`, true, i)));
@@ -108,6 +120,7 @@ export function applySolution(level: LevelDef, board: Board): boolean {
     if (!canPlaceWire(board, a, b)) ok = false;
     board.wires.push(wireFromSpec(board, spec, `solution-wire-${i}`, false, i));
   });
+  if (level.solution.light !== undefined) board.light = level.solution.light;
   return ok;
 }
 
