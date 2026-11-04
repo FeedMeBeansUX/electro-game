@@ -81,3 +81,33 @@ export const sfx = {
   success: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.16, { type: 'triangle', vol: 0.1, delay: i * 0.11 })),
   tap: () => tone(740, 0.04, { type: 'triangle', vol: 0.06 }),
 };
+
+let buzz: { osc: OscillatorNode; lfo: OscillatorNode } | null = null;
+
+/** Starts or stops the buzzer sound: a soft beep-beep-beep rather than a harsh tone. */
+export function setBuzzing(on: boolean): void {
+  if (on && !buzz) {
+    const a = ac();
+    if (!a) return;
+    const osc = a.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 660;
+    const gain = a.createGain();
+    gain.gain.value = 0.02;
+    // A slow square wave on the volume makes it pulse.
+    const lfo = a.createOscillator();
+    lfo.type = 'square';
+    lfo.frequency.value = 5;
+    const depth = a.createGain();
+    depth.gain.value = 0.02;
+    lfo.connect(depth).connect(gain.gain);
+    osc.connect(gain).connect(a.destination);
+    osc.start();
+    lfo.start();
+    buzz = { osc, lfo };
+  } else if (!on && buzz) {
+    buzz.osc.stop();
+    buzz.lfo.stop();
+    buzz = null;
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "id": "w3-l4",
+  "world": 3,
+  "index": 4,
+  "title": {
+    "nl": "De draaiknop",
+    "en": "The knob"
+  },
+  "intro": {
+    "nl": "Tik op de draaiknop. Kun je het lampje zo fel mogelijk maken?",
+    "en": "Tap the knob. Can you make the light as bright as it can go?"
+  },
+  "parentNote": {
+    "nl": "Een draaiknop (potmeter) is een weerstand die je kunt veranderen.",
+    "en": "A knob (potentiometer) is a resistor you can change."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "pot",
+        "type": "pot",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "knob": 0
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.9
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "id": "pot",
+        "type": "pot",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "knob": 1
+        }
+      }
+    ],
+    "wires": []
+  }
+}

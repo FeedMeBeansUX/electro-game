@@ -1,0 +1,151 @@
+{
+  "id": "w2-l1",
+  "world": 2,
+  "index": 1,
+  "title": {
+    "nl": "Druk op de knop",
+    "en": "Press the button"
+  },
+  "intro": {
+    "nl": "Zet de drukknop in het gat. Druk erop en houd vast: dan gaat het lampje aan!",
+    "en": "Put the push button in the gap. Press it and hold: then the light turns on!"
+  },
+  "parentNote": {
+    "nl": "Een drukknop maakt de kring alleen dicht zolang je erop drukt.",
+    "en": "A push button only closes the circuit while you press it."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "button",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "button",
+      "pos": [
+        6,
+        4
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "button",
+        "pos": [
+          6,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": []
+  }
+}

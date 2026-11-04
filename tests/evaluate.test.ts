@@ -99,3 +99,55 @@ describe('evaluateBoard', () => {
     expect(on.kind === 'led' && on.brightness).toBeGreaterThan(0.6);
   });
 });
+
+describe('evaluateBoard: new parts', () => {
+  /** Battery (+ top-left) with a part on top and a plain wire on the right and bottom. */
+  function withPart(type: PartType, rot: Rot = 0, props: PartProps = {}): Board {
+    return {
+      cols: 24,
+      rows: 11,
+      parts: [part('bat', 'battery', 5, 6, 1, { voltage: 3 }), part('x', type, 12, 4, rot, props)],
+      wires: [wire('w1', 5, 4, 11, 4), wire('w2', 13, 4, 19, 4), wire('w3', 19, 4, 19, 8), wire('w4', 19, 8, 5, 8)],
+    };
+  }
+
+  it('a fan spins one way, and the other way when turned around', () => {
+    const fwd = evaluateBoard(withPart('fan', 0)).parts.get('x')!;
+    const back = evaluateBoard(withPart('fan', 2)).parts.get('x')!;
+    expect(fwd.kind === 'fan' && fwd.speed).toBe(1);
+    expect(back.kind === 'fan' && back.speed).toBe(-1);
+  });
+
+  it('a buzzer sounds only the right way round', () => {
+    const on = evaluateBoard(withPart('buzzer', 0)).parts.get('x')!;
+    const off = evaluateBoard(withPart('buzzer', 2)).parts.get('x')!;
+    expect(on.kind === 'buzzer' && on.on).toBe(true);
+    expect(on.amps).toBeGreaterThan(0.02);
+    expect(on.amps).toBeLessThan(0.05);
+    expect(off.kind === 'buzzer' && off.on).toBe(false);
+  });
+
+  it('a push button conducts only while pressed', () => {
+    const up = evaluateBoard(withPart('button', 0, { closed: false }));
+    const down = evaluateBoard(withPart('button', 0, { closed: true }));
+    expect(Math.abs(up.wires.get('w1')!)).toBeLessThan(1e-6);
+    // With nothing else in the loop a pressed button is a short circuit.
+    expect(down.shorted).toBe(true);
+  });
+
+  it('turning the potentiometer knob up makes an LED brighter, without popping it', () => {
+    const brightness = (knob: number) => {
+      const b = withPart('pot', 0, { knob });
+      b.wires = b.wires.filter((w) => w.id !== 'w3');
+      b.parts.push(part('led', 'led', 19, 5, 1, { color: 'red' }));
+      b.wires.push(wire('w5', 19, 6, 19, 8));
+      const s = evaluateBoard(b).parts.get('led')!;
+      expect(s.kind === 'led' && s.popped).toBe(false);
+      return s.kind === 'led' ? s.brightness : -1;
+    };
+    const levels = [0, 0.25, 0.5, 0.75, 1].map(brightness);
+    for (let i = 1; i < levels.length; i++) expect(levels[i]).toBeGreaterThan(levels[i - 1]);
+    expect(levels[0]).toBeLessThan(0.15);
+    expect(levels[4]).toBeGreaterThan(0.9);
+  });
+});

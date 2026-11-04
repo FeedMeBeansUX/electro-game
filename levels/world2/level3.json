@@ -1,0 +1,194 @@
+{
+  "id": "w2-l3",
+  "world": 2,
+  "index": 3,
+  "title": {
+    "nl": "Allebei aan",
+    "en": "Both on"
+  },
+  "intro": {
+    "nl": "Het lampje mag alleen aan als allebei de schakelaars aan staan. Maak de kring dicht en zet ze allebei aan.",
+    "en": "The light may only turn on when both switches are on. Close the circuit and turn them both on."
+  },
+  "parentNote": {
+    "nl": "Twee schakelaars achter elkaar: de stroom moet door allebei. Dat heet EN.",
+    "en": "Two switches one after the other: the current must go through both. That's called AND."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "id": "s1",
+        "type": "switch",
+        "pos": [
+          4,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": false
+        }
+      },
+      {
+        "id": "s2",
+        "type": "switch",
+        "pos": [
+          8,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": false
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          9,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "wire",
+      "count": 2
+    }
+  ],
+  "goals": [
+    {
+      "kind": "truthTable",
+      "inputs": [
+        "s1",
+        "s2"
+      ],
+      "output": "led",
+      "expect": "and",
+      "live": true
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "id": "s1",
+        "type": "switch",
+        "pos": [
+          4,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      },
+      {
+        "id": "s2",
+        "type": "switch",
+        "pos": [
+          8,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          7,
+          4
+        ],
+        "to": [
+          5,
+          4
+        ]
+      },
+      {
+        "from": [
+          3,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  }
+}

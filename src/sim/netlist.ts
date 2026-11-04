@@ -1,11 +1,16 @@
 import { pinCells, wireEnds, type Board } from '../board/board';
 import { cellKey, type Cell } from '../board/grid';
-import type { LedColor } from '../parts/defs';
+import { potOhms, type LedColor } from '../parts/defs';
 import { diodeModel, type Circuit, type Element } from './circuit';
 
 /** Wires are tiny resistors so their current can be read for the current-dot animation. */
 export const WIRE_OHMS = 0.01;
 export const BATTERY_INTERNAL_OHMS = 0.5;
+/** A small hobby motor with a fan on it. */
+export const FAN_OHMS = 20;
+/** An active buzzer: a one-way junction plus some resistance (≈30 mA at 3 V). */
+export const BUZZER_FORWARD_VOLTS = 0.6;
+export const BUZZER_OHMS = 70;
 
 /** Forward voltage at 10 mA, per LED colour. */
 export const LED_FORWARD_VOLTS: Record<LedColor, number> = {
@@ -38,6 +43,15 @@ export function buildNetlist(board: Board, excluded: ReadonlySet<string> = new S
     return id;
   };
 
+  /** Extra nodes inside a part (e.g. between a buzzer's junction and its resistance). */
+  let internal = 0;
+  const innerNode = (): number => {
+    const k = `inner:${internal++}`;
+    const id = nodeOfCell.size;
+    nodeOfCell.set(k, id);
+    return id;
+  };
+
   const elements: Element[] = [];
   for (const p of board.parts) {
     if (excluded.has(p.id)) continue;
@@ -64,8 +78,22 @@ export function buildNetlist(board: Board, excluded: ReadonlySet<string> = new S
         break;
       }
       case 'switch':
+      case 'button':
         elements.push({ kind: 'switch', id: p.id, a: n0, b: n1, closed: p.props.closed ?? false });
         break;
+      case 'fan':
+        elements.push({ kind: 'resistor', id: p.id, a: n0, b: n1, ohms: FAN_OHMS });
+        break;
+      case 'pot':
+        elements.push({ kind: 'resistor', id: p.id, a: n0, b: n1, ohms: potOhms(p.props.knob ?? 0) });
+        break;
+      case 'buzzer': {
+        // The diode carries the buzzer's id, so its current is the buzzer current.
+        const mid = innerNode();
+        elements.push({ kind: 'diode', id: p.id, anode: n0, cathode: mid, ...diodeModel(BUZZER_FORWARD_VOLTS, 0.01, 1.5) });
+        elements.push({ kind: 'resistor', id: `${p.id}:r`, a: mid, b: n1, ohms: BUZZER_OHMS });
+        break;
+      }
     }
   }
   for (const w of board.wires) {

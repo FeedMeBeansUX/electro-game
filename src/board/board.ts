@@ -120,3 +120,24 @@ export function cloneBoard(b: Board): Board {
     wires: b.wires.map((w) => ({ ...w, points: w.points.map((c) => ({ ...c })) })),
   };
 }
+
+/**
+ * "Smart drop": when a part is dropped, turn it a quarter turn if that makes
+ * more of its pins land on wire ends. Never flips it end-to-end (that would
+ * change an LED's direction, which the child should decide).
+ */
+export function bestRotation(board: Board, part: Pick<PlacedPart, 'type' | 'pos' | 'rot'>, ignoreId?: string): Rot {
+  const ends = new Set(board.wires.flatMap((w) => wireEnds(w).map(cellKey)));
+  const connections = (rot: Rot) => pinCells({ ...part, rot }).filter((c) => ends.has(cellKey(c))).length;
+  let best = part.rot;
+  let bestCount = canPlacePart(board, part, ignoreId) ? connections(part.rot) : -1;
+  for (const rot of [(part.rot + 1) % 4, (part.rot + 3) % 4] as Rot[]) {
+    if (!canPlacePart(board, { ...part, rot }, ignoreId)) continue;
+    const n = connections(rot);
+    if (n > bestCount) {
+      best = rot;
+      bestCount = n;
+    }
+  }
+  return best;
+}

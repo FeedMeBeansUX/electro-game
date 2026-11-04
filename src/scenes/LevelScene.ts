@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import {
+  bestRotation,
   canPlacePart,
   canPlaceWire,
   pinCells,
@@ -11,11 +12,12 @@ import {
 } from '../board/board';
 import { cellKey, nextRot, sameCell, type Cell, type Rot } from '../board/grid';
 import { pickBoardTarget, type BoardTarget } from '../board/pick';
-import { LEVELS, buildLevelBoard, partFromSpec, type InventoryItem, type LevelDef } from '../levels/levels';
+import { LEVELS, buildLevelBoard, matchesItem, partFromSpec, type InventoryItem, type LevelDef } from '../levels/levels';
 import { evaluateBoard, MIN_VISIBLE_AMPS, SHORT_CIRCUIT_AMPS, type BoardEval } from '../sim/evaluate';
-import { checkGoals } from '../goals/goals';
-import { nextHintStep, type HintStep } from '../hints/hints';
-import { PART_DEFS, type PartType } from '../parts/defs';
+import { brightnessFeedback, checkGoals } from '../goals/goals';
+import { nextHintStep, samePlace, type HintStep } from '../hints/hints';
+import { DIRS } from '../board/grid';
+import { PART_DEFS, nextKnob } from '../parts/defs';
 import { LED_COLORS, PAL, WIRE_COLORS, hex } from '../art/palette';
 import { ensureBoardTexture, partTextureKey } from '../art/textures';
 import { Label, FONT_FAMILY } from '../ui/Label';
@@ -23,9 +25,10 @@ import { Button } from '../ui/Button';
 import { Mascot } from '../ui/Mascot';
 import { HintOverlay } from '../ui/HintOverlay';
 import { addParentGate } from '../ui/ParentGate';
+import { drawWire } from '../ui/drawWire';
 import { t, type StringKey, type Txt } from '../i18n/strings';
 import { say, sayOnce, stopSpeaking } from '../audio/speech';
-import { sfx } from '../audio/sfx';
+import { setBuzzing, sfx } from '../audio/sfx';
 import { markCompleted } from '../progress';
 import {
   TOP_BAR_H,
@@ -116,13 +119,26 @@ export class LevelScene extends Phaser.Scene {
   private hints!: HintOverlay;
   private hintStage = 0;
   private lastActivity = 0;
+  /** A level made in the editor, played instead of a built-in one. */
+  private custom: LevelDef | null = null;
+  /** Where the home button goes: the map, or back to the editor after a test play. */
+  private returnTo: 'map' | 'editor' = 'map';
+  /** The push button being held down right now. */
+  private pressed: PlacedPart | null = null;
+  private windG!: Phaser.GameObjects.Graphics;
+  /** Fan blade angles, kept across re-renders so the blades spin smoothly. */
+  private fanAngles = new Map<string, number>();
 
   constructor() {
     super('level');
   }
 
-  init(data: { index?: number }): void {
+  init(data: { index?: number; custom?: LevelDef; returnTo?: 'map' | 'editor' }): void {
     this.index = data.index ?? 0;
+    this.custom = data.custom ?? null;
+    this.returnTo = data.returnTo ?? 'map';
+    this.pressed = null;
+    this.fanAngles = new Map();
     this.ev = null;
     this.slots = [];
     this.drag = { kind: 'none' };
@@ -137,7 +153,7 @@ export class LevelScene extends Phaser.Scene {
 
   create(): void {
     fitCamera(this);
-    this.level = LEVELS[this.index];
+    this.level = this.custom ?? LEVELS[this.index];
     this.s = this.level.scale ?? 1;
     this.layout = boardLayout(this.level.cols, this.level.rows, this.s);
     this.board = buildLevelBoard(this.level);
@@ -165,6 +181,7 @@ export class LevelScene extends Phaser.Scene {
 
     this.wiresG = this.add.graphics().setDepth(5);
     this.dotsG = this.add.graphics().setDepth(7);
+    this.windG = this.add.graphics().setDepth(9);
     this.previewG = this.add.graphics().setDepth(40);
     this.hints = new HintOverlay(this);
 
@@ -181,6 +198,14 @@ export class LevelScene extends Phaser.Scene {
       this.input.off(Phaser.Input.Events.POINTER_MOVE, this.onPointerMove, this);
       this.input.off(Phaser.Input.Events.POINTER_UP, this.onPointerUp, this);
       this.input.off(Phaser.Input.Events.POINTER_UP_OUTSIDE, this.onPointerUp, this);
+      setBuzzing(false);
+    });
+    // The parent corner pauses this scene: stop the buzzer meanwhile.
+    this.events.on(Phaser.Scenes.Events.PAUSE, () => setBuzzing(false));
+    this.events.on(Phaser.Scenes.Events.RESUME, () => this.refresh(false));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.events.off(Phaser.Scenes.Events.PAUSE);
+      this.events.off(Phaser.Scenes.Events.RESUME);
     });
 
     this.refresh(false);
@@ -190,7 +215,14 @@ export class LevelScene extends Phaser.Scene {
 
   update(time: number, delta: number): void {
     this.drawCurrentDots(delta);
+    this.animateFans(delta);
     this.updateHints(time);
+  }
+
+  private goHome(): void {
+    stopSpeaking();
+    if (this.returnTo === 'editor') this.scene.start('editor');
+    else this.scene.start('map', { world: this.custom ? 'custom' : this.level.world });
   }
 
   private sayIntro(): void {
@@ -208,20 +240,20 @@ export class LevelScene extends Phaser.Scene {
     this.add.rectangle(0, TOP_BAR_H - 1, VIEW_W, 1, PAL.navy).setOrigin(0);
     new Button(this, 16, 14, { size: 20, icon: 'icon-home' }, () => {
       sfx.tap();
-      stopSpeaking();
-      this.scene.start('map');
+      this.goHome();
     });
     new Button(this, 42, 14, { size: 20, icon: 'icon-restart' }, () => {
       sfx.tap();
       stopSpeaking();
-      this.scene.restart({ index: this.index });
+      this.scene.restart({ index: this.index, custom: this.custom ?? undefined, returnTo: this.returnTo });
     });
-    const n = this.index + 1;
     const lvl = t('level');
-    const title: Txt = {
-      nl: `${lvl.nl} ${n} · ${this.level.title.nl}`,
-      en: `${lvl.en} ${n} · ${this.level.title.en}`,
-    };
+    const title: Txt = this.custom
+      ? this.level.title
+      : {
+          nl: `${lvl.nl} ${this.level.index} · ${this.level.title.nl}`,
+          en: `${lvl.en} ${this.level.index} · ${this.level.title.en}`,
+        };
     new Label(this, VIEW_W / 2, 3, title, { size: 10, color: PAL.yellow });
     new Button(this, VIEW_W - 42, 14, { size: 20, icon: 'icon-speaker' }, () => this.sayIntro());
     addParentGate(this, VIEW_W - 16, 14);
@@ -267,8 +299,13 @@ export class LevelScene extends Phaser.Scene {
     slot.count.setText(`×${slot.left}`).setAlpha(empty ? 0.4 : 1);
   }
 
-  private slotFor(type: PartType | 'wire'): Slot | undefined {
+  private slotFor(type: 'wire'): Slot | undefined {
     return this.slots.find((s) => s.item.type === type);
+  }
+
+  /** The tray slot a part belongs in (same type and value, e.g. the 1 kΩ resistor's own slot). */
+  private slotForPart(part: Pick<PlacedPart, 'type' | 'props'>): Slot | undefined {
+    return this.slots.find((s) => matchesItem(s.item, part)) ?? this.slots.find((s) => s.item.type === part.type);
   }
 
   private wiggle(target: Phaser.GameObjects.Components.Transform & Phaser.GameObjects.GameObject): void {
@@ -280,9 +317,29 @@ export class LevelScene extends Phaser.Scene {
 
   private onPointerDown(p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[]): void {
     this.resetActivity();
-    if (over.length > 0 || this.complete || this.drag.kind !== 'none') return;
+    if (over.length > 0 || this.drag.kind !== 'none') return;
     const target = this.hitTest(p.worldX, p.worldY);
-    if (target) this.drag = { kind: 'pending', pointerId: p.id, start: { x: p.worldX, y: p.worldY }, target };
+    if (!target) return;
+    const part = target.type === 'part' ? target.part : undefined;
+    // After the level is done, the child can still play with switches, buttons and knobs.
+    if (this.complete && (!part || PART_DEFS[part.type].tap === 'rotate')) return;
+    if (part && PART_DEFS[part.type].tap === 'press') this.press(part);
+    this.drag = { kind: 'pending', pointerId: p.id, start: { x: p.worldX, y: p.worldY }, target };
+  }
+
+  /** Push buttons conduct only while held down. */
+  private press(part: PlacedPart): void {
+    this.pressed = part;
+    part.props.closed = true;
+    sfx.tap();
+    this.refresh();
+  }
+
+  private release(): void {
+    if (!this.pressed) return;
+    this.pressed.props.closed = false;
+    this.pressed = null;
+    this.refresh();
   }
 
   private onPointerMove(p: Phaser.Input.Pointer): void {
@@ -290,6 +347,8 @@ export class LevelScene extends Phaser.Scene {
     if (d.kind === 'none' || d.pointerId !== p.id) return;
     if (d.kind === 'pending') {
       if (Phaser.Math.Distance.Between(d.start.x, d.start.y, p.worldX, p.worldY) < DRAG_THRESHOLD) return;
+      if (this.complete) return; // only taps and holds once the level is done
+      this.release();
       this.beginDrag(d.target, p);
     }
     this.moveDrag(p);
@@ -298,6 +357,7 @@ export class LevelScene extends Phaser.Scene {
   private onPointerUp(p: Phaser.Input.Pointer): void {
     const d = this.drag;
     if (d.kind === 'none' || d.pointerId !== p.id) return;
+    this.release();
     if (d.kind === 'pending') {
       this.drag = { kind: 'none' };
       this.tap(d.target);
@@ -322,8 +382,8 @@ export class LevelScene extends Phaser.Scene {
         this.wiggle(target.slot.icon);
         break;
       case 'hole':
-        // Tapping a pin acts like tapping the part.
-        if (target.part) this.tapPart(target.part, true);
+        // Tapping a pin acts like tapping the part (but never presses a button).
+        if (target.part && PART_DEFS[target.part.type].tap !== 'press') this.tapPart(target.part, true);
         break;
       case 'part':
         this.tapPart(target.part);
@@ -333,11 +393,18 @@ export class LevelScene extends Phaser.Scene {
     }
   }
 
-  /** Tap on a part: switches toggle, movable parts turn, fixed parts just wiggle (unless `quiet`). */
+  /** Tap on a part: switches toggle, knobs turn a step, movable parts turn, fixed parts just wiggle (unless `quiet`). */
   private tapPart(part: PlacedPart, quiet = false): void {
-    if (PART_DEFS[part.type].tap === 'toggle') {
+    const action = PART_DEFS[part.type].tap;
+    if (action === 'press') return; // handled on press and release
+    if (this.complete && action === 'rotate') return;
+    if (action === 'toggle') {
       sfx.tap();
       part.props.closed = !part.props.closed;
+      this.refresh();
+    } else if (action === 'knob') {
+      sfx.rotate();
+      part.props.knob = nextKnob(part.props.knob ?? 0);
       this.refresh();
     } else if (!part.fixed) {
       this.rotate(part);
@@ -397,7 +464,7 @@ export class LevelScene extends Phaser.Scene {
         this.startPartDrag(
           part,
           { ...part, pos: { ...part.pos } },
-          this.slotFor(part.type),
+          this.slotForPart(part),
           { x: c.x - p.worldX, y: c.y - p.worldY },
           p,
         );
@@ -459,9 +526,14 @@ export class LevelScene extends Phaser.Scene {
       const y = p.worldY + d.offset.y;
       d.sprite.setPosition(x, y);
       const cell = worldToCell(this.layout, x, y);
-      const ok = p.worldY < TRAY_Y && canPlacePart(this.board, { ...d.part, pos: cell });
+      const rot = bestRotation(this.board, { ...d.part, pos: cell });
+      const ok = p.worldY < TRAY_Y && canPlacePart(this.board, { ...d.part, pos: cell, rot });
       const c = cellToWorld(this.layout, cell);
-      d.ghost.setPosition(c.x, c.y).setVisible(ok);
+      d.ghost
+        .setTexture(partTextureKey(d.part.type, d.part.props, false, rot))
+        .setAngle(rot * 90)
+        .setPosition(c.x, c.y)
+        .setVisible(ok);
     } else if (d.kind === 'wire') {
       d.overTray = p.worldY >= TRAY_Y;
       const cell = worldToCell(this.layout, p.worldX, p.worldY);
@@ -478,12 +550,14 @@ export class LevelScene extends Phaser.Scene {
       d.sprite.destroy();
       d.ghost.destroy();
       const cell = worldToCell(this.layout, p.worldX + d.offset.x, p.worldY + d.offset.y);
+      const rot = bestRotation(this.board, { ...d.part, pos: cell });
       if (p.worldY >= TRAY_Y) {
         // Back into the tray.
         if (d.original && d.slot) d.slot.left++;
         sfx.remove();
-      } else if (canPlacePart(this.board, { ...d.part, pos: cell })) {
+      } else if (canPlacePart(this.board, { ...d.part, pos: cell, rot })) {
         d.part.pos = cell;
+        d.part.rot = rot;
         this.board.parts.push(d.part);
         if (!d.original && d.slot) d.slot.left--;
         this.justPlaced = d.part.id;
@@ -561,11 +635,16 @@ export class LevelScene extends Phaser.Scene {
         this.sayKey('sayShort');
       } else if (this.board.parts.some((p) => !p.fixed && isReversed(ev, p.id))) {
         this.sayKey('sayReversed');
+      } else if (!this.complete) {
+        const why = brightnessFeedback(this.level.goals, ev);
+        if (why === 'tooBright') this.sayKey('sayTooBright', 10000);
+        else if (why === 'tooDim') this.sayKey('sayTooDim', 10000);
       }
     }
     this.wasShorted = ev.shorted;
+    setBuzzing([...ev.parts.values()].some((st) => st.kind === 'buzzer' && st.on));
 
-    if (!this.complete && this.drag.kind === 'none' && checkGoals(this.level.goals, ev).done) this.celebrate();
+    if (!this.complete && this.drag.kind === 'none' && checkGoals(this.level.goals, ev, this.board).done) this.celebrate();
   }
 
   private renderParts(ev: BoardEval): void {
@@ -621,6 +700,33 @@ export class LevelScene extends Phaser.Scene {
         sprite.setTint(PAL.orange);
         this.tweens.add({ targets: sprite, x: x + s, duration: 40, yoyo: true, repeat: -1 });
       }
+      if (part.type === 'fan') {
+        const blades = this.add
+          .image(x, y, 'fan-blades')
+          .setScale(s)
+          .setAngle(this.fanAngles.get(part.id) ?? 0)
+          .setDepth(11)
+          .setData('fan', part.id);
+        extras.push(blades);
+      }
+      if (part.type === 'pot') {
+        const knob = this.add
+          .image(x, y, 'pot-knob')
+          .setScale(s)
+          .setAngle(-135 + 270 * (part.props.knob ?? 0))
+          .setDepth(11);
+        extras.push(knob);
+      }
+      if (state?.kind === 'buzzer' && state.on) {
+        this.tweens.add({ targets: sprite, x: x + s, duration: 30, yoyo: true, repeat: -1 });
+        const wave = this.add
+          .image(x + 12 * s, y - 6 * s, 'icon-wave')
+          .setScale(s * 0.75)
+          .setTint(PAL.yellow)
+          .setDepth(12);
+        this.tweens.add({ targets: wave, alpha: { from: 1, to: 0.2 }, x: wave.x + 3 * s, duration: 200, yoyo: true, repeat: -1 });
+        extras.push(wave);
+      }
       if (part.id === this.justPlaced) {
         sprite.setScale(s * 1.3);
         this.tweens.add({ targets: sprite, scale: s, duration: 220, ease: 'Back.easeOut' });
@@ -639,35 +745,7 @@ export class LevelScene extends Phaser.Scene {
   }
 
   private drawWire(g: Phaser.GameObjects.Graphics, cells: Cell[], color: number, alpha: number, hot = false): void {
-    const s = this.s;
-    const pts = cells.map((c) => cellToWorld(this.layout, c));
-    const seg = (a: Point, b: Point, th: number, dx: number, dy: number, col: number, al: number) => {
-      const x = Math.min(a.x, b.x) - th / 2 + dx;
-      const y = Math.min(a.y, b.y) - th / 2 + dy;
-      g.fillStyle(col, al).fillRect(x, y, Math.abs(a.x - b.x) + th, Math.abs(a.y - b.y) + th);
-    };
-    for (let i = 1; i < pts.length; i++) seg(pts[i - 1], pts[i], 2 * s, s, s + 1, PAL.ink, 0.35 * alpha);
-    if (hot) for (let i = 1; i < pts.length; i++) seg(pts[i - 1], pts[i], 4 * s, 0, 0, PAL.yellow, 0.8 * alpha);
-    for (let i = 1; i < pts.length; i++) seg(pts[i - 1], pts[i], 2 * s, 0, 0, hot ? PAL.orange : color, alpha);
-    if (s > 1 && !hot) {
-      // A lighter stripe along the top-left edge gives the wire a rounded look at the big scale.
-      const light = Phaser.Display.Color.IntegerToColor(color).lighten(20).color;
-      for (let i = 1; i < pts.length; i++) {
-        const a = pts[i - 1];
-        const b = pts[i];
-        const horizontal = a.y === b.y;
-        g.fillStyle(light, 0.7 * alpha).fillRect(
-          Math.min(a.x, b.x) - s,
-          Math.min(a.y, b.y) - s,
-          horizontal ? Math.abs(a.x - b.x) + 2 * s : 1,
-          horizontal ? 1 : Math.abs(a.y - b.y) + 2 * s,
-        );
-      }
-    }
-    const dark = Phaser.Display.Color.IntegerToColor(color).darken(25).color;
-    for (const end of [pts[0], pts[pts.length - 1]]) {
-      g.fillStyle(dark, alpha).fillRect(end.x - 2 * s, end.y - 2 * s, 4 * s, 4 * s);
-    }
+    drawWire(g, this.layout, cells, color, alpha, hot);
   }
 
   private drawWirePreview(d: Extract<Drag, { kind: 'wire' }>, p: Phaser.Input.Pointer): void {
@@ -724,6 +802,38 @@ export class LevelScene extends Phaser.Scene {
     }
   }
 
+  /** Spins fan blades and draws little wind streaks blowing away from each turning fan. */
+  private animateFans(delta: number): void {
+    const g = this.windG.clear();
+    const ev = this.ev;
+    if (!ev) return;
+    const s = this.s;
+    for (const part of this.board.parts) {
+      if (part.type !== 'fan') continue;
+      const st = ev.parts.get(part.id);
+      const speed = st?.kind === 'fan' ? st.speed : 0;
+      const angle = ((this.fanAngles.get(part.id) ?? 0) + speed * 900 * (delta / 1000)) % 360;
+      this.fanAngles.set(part.id, angle);
+      const blades = this.partViews.get(part.id)?.extras.find((o) => o.getData('fan') === part.id);
+      (blades as Phaser.GameObjects.Image | undefined)?.setAngle(angle);
+      if (Math.abs(speed) < 0.05) continue;
+      // Wind blows across the fan, at right angles to its pins; turning the fan around reverses it.
+      const d = DIRS[part.rot];
+      const wx = -d.y * Math.sign(speed);
+      const wy = d.x * Math.sign(speed);
+      const c = cellToWorld(this.layout, part.pos);
+      const reach = 30 * s;
+      g.fillStyle(PAL.sky, 0.9);
+      for (let lane = -1; lane <= 1; lane++) {
+        const phase = (this.dotPhase * 40 * Math.abs(speed) * s + lane * 9 * s) % reach;
+        const ox = c.x + d.x * lane * 5 * s + wx * (9 * s + phase);
+        const oy = c.y + d.y * lane * 5 * s + wy * (9 * s + phase);
+        const len = 4 * s;
+        g.fillRect(Math.round(Math.min(ox, ox + wx * len)), Math.round(Math.min(oy, oy + wy * len)), Math.abs(wx) * len + s, Math.abs(wy) * len + s);
+      }
+    }
+  }
+
   private puff(at: Point): void {
     const s = this.s;
     const flash = this.add.circle(at.x, at.y, 8 * s, PAL.white, 0.9).setDepth(20);
@@ -761,51 +871,84 @@ export class LevelScene extends Phaser.Scene {
 
   // ─────────────────────────── Hints ───────────────────────────
 
+  /**
+   * Restarts the idle timer. It starts counting on the next frame: right after a
+   * scene starts, its clock can still hold an old time, which made hints appear at once.
+   */
   private resetActivity(): void {
-    this.lastActivity = this.time.now;
+    this.lastActivity = -1;
     this.hintStage = 0;
     this.hints?.clear();
   }
 
   private updateHints(now: number): void {
+    if (this.lastActivity < 0) this.lastActivity = now;
     if (this.complete || this.drag.kind !== 'none') return;
     const idle = now - this.lastActivity;
     const stage = idle >= HINT_AUTO_MS ? 3 : idle >= HINT_DEMO_MS ? 2 : idle >= HINT_POINT_MS ? 1 : 0;
     if (stage <= this.hintStage) return;
     this.hintStage = stage;
-    const step = nextHintStep(this.level, this.board);
+    const step = nextHintStep(this.level, this.board) ?? this.tryItStep();
     if (!step) return;
     if (stage === 1) this.hintPoint(step);
     else if (stage === 2) this.hintDemo(step);
     else this.hintAuto(step);
   }
 
+  /**
+   * Everything is built but the goal isn't met: suggest trying a button,
+   * a switch that is off, or the knob.
+   */
+  private tryItStep(): HintStep | null {
+    const pick =
+      this.board.parts.find((p) => p.type === 'button') ??
+      this.board.parts.find((p) => p.type === 'switch' && !p.props.closed) ??
+      this.board.parts.find((p) => p.type === 'pot');
+    if (!pick) return null;
+    const target = { ...pick, props: { ...pick.props } };
+    if (pick.type === 'switch') target.props.closed = true;
+    if (pick.type === 'pot') target.props.knob = nextKnob(pick.props.knob ?? 0);
+    return { kind: 'adjust', partId: pick.id, target };
+  }
+
+  /** The part a step is about, if it is already on the board. */
+  private stepPart(step: HintStep): PlacedPart | undefined {
+    if (step.kind === 'adjust') return this.board.parts.find((p) => p.id === step.partId);
+    if (step.kind === 'set') return this.board.parts.find((p) => samePlace(p, step.target));
+    return undefined;
+  }
+
   private stepPoints(step: HintStep): { from: Point; to: Point } {
-    switch (step.kind) {
-      case 'wire':
-        return { from: cellToWorld(this.layout, step.from), to: cellToWorld(this.layout, step.to) };
-      case 'place': {
-        const slot = this.slotFor(step.target.type);
-        const to = cellToWorld(this.layout, step.target.pos);
-        return { from: slot ? { x: slot.icon.x, y: slot.icon.y } : to, to };
-      }
-      case 'adjust': {
-        const part = this.board.parts.find((p) => p.id === step.partId);
-        const at = cellToWorld(this.layout, part?.pos ?? step.target.pos);
-        return { from: at, to: at };
-      }
+    if (step.kind === 'wire') {
+      return { from: cellToWorld(this.layout, step.from), to: cellToWorld(this.layout, step.to) };
     }
+    if (step.kind === 'place') {
+      const slot = this.slotForPart(step.target);
+      const to = cellToWorld(this.layout, step.target.pos);
+      return { from: slot ? { x: slot.icon.x, y: slot.icon.y } : to, to };
+    }
+    const at = cellToWorld(this.layout, this.stepPart(step)?.pos ?? step.target.pos);
+    return { from: at, to: at };
+  }
+
+  private hintLine(step: HintStep): StringKey {
+    if (step.kind === 'wire') return 'sayWireHowTo';
+    if (step.kind === 'place') return 'sayHintPlace';
+    const type = step.target.type;
+    if (type === 'switch') return 'sayHintSwitch';
+    if (type === 'button') return 'sayHintPress';
+    if (type === 'pot') return 'sayHintKnob';
+    return 'sayHintTurn';
   }
 
   private hintPoint(step: HintStep): void {
     const { from, to } = this.stepPoints(step);
     this.hints.clear();
-    if (step.kind === 'adjust') this.hints.point(from);
+    if (step.kind === 'adjust' || step.kind === 'set') this.hints.point(from);
     else this.hints.point(from, to);
     this.mascot.hop();
     sfx.hint();
-    const line: StringKey = step.kind === 'wire' ? 'sayWireHowTo' : step.kind === 'place' ? 'sayHintPlace' : 'sayHintTurn';
-    this.sayKey(line, 15000);
+    this.sayKey(this.hintLine(step), 15000);
   }
 
   private hintDemo(step: HintStep): void {
@@ -839,9 +982,11 @@ export class LevelScene extends Phaser.Scene {
         done = true;
       }
     } else if (step.kind === 'place') {
-      const slot = this.slotFor(step.target.type);
+      const slot = this.slotForPart(step.target);
       if (slot && slot.left > 0 && canPlacePart(this.board, step.target)) {
-        const part = { ...step.target, id: `${step.target.type}-${++this.nextId}`, props: { ...step.target.props } };
+        // Placed the way the tray has it (a switch arrives off; turning it on is the next step).
+        const props = { ...PART_DEFS[step.target.type].defaults, ...slot.item.props };
+        const part = { ...step.target, id: `${step.target.type}-${++this.nextId}`, props };
         this.board.parts.push(part);
         slot.left--;
         this.drawSlot(slot);
@@ -850,22 +995,30 @@ export class LevelScene extends Phaser.Scene {
         done = true;
       }
     } else {
-      const part = this.board.parts.find((p) => p.id === step.partId);
-      if (part && canPlacePart(this.board, { ...part, pos: step.target.pos, rot: step.target.rot }, part.id)) {
-        part.pos = { ...step.target.pos };
-        part.rot = step.target.rot;
-        this.justPlaced = part.id;
-        sfx.rotate();
-        done = true;
+      const part = this.stepPart(step);
+      // A push button can't be held down for the child; keep showing how instead.
+      if (part && part.type !== 'button') {
+        const { pos, rot } = step.target;
+        if (canPlacePart(this.board, { ...part, pos, rot }, part.id)) {
+          part.pos = { ...pos };
+          part.rot = rot;
+          if (part.type === 'switch') part.props.closed = step.target.props.closed;
+          if (part.type === 'pot') part.props.knob = step.target.props.knob;
+          this.justPlaced = part.id;
+          sfx.rotate();
+          done = true;
+        }
       }
     }
     if (done) {
       this.sayKey('sayHintHelp', 0);
       this.mascot.hop(2);
       this.refresh(false);
+    } else if (step.kind === 'adjust' || step.kind === 'set') {
+      this.hints.tap(this.stepPoints(step).from);
     }
     // Start the hint cycle again for the next step.
-    this.lastActivity = this.time.now;
+    this.lastActivity = -1;
     this.hintStage = 0;
   }
 
@@ -874,7 +1027,7 @@ export class LevelScene extends Phaser.Scene {
   private celebrate(): void {
     this.complete = true;
     this.hints.clear();
-    markCompleted(this.level.id);
+    if (!this.custom) markCompleted(this.level.id);
     for (const part of this.board.parts) {
       const st = this.ev?.parts.get(part.id);
       if (st?.kind === 'led' && st.brightness > 0) this.sparkle(cellToWorld(this.layout, part.pos));
@@ -911,7 +1064,9 @@ export class LevelScene extends Phaser.Scene {
 
   /** A card slides up over the tray, so the working circuit stays visible above it. */
   private showComplete(): void {
-    const last = this.index >= LEVELS.length - 1;
+    const next = this.custom ? undefined : LEVELS[this.index + 1];
+    // The last level of a world gets an extra-big "all done".
+    const last = !this.custom && (!next || next.world !== this.level.world);
     const h = VIEW_H - TRAY_Y;
     const card = this.add.container(0, VIEW_H).setDepth(50);
     const bg = this.add.graphics();
@@ -928,12 +1083,12 @@ export class LevelScene extends Phaser.Scene {
     }
     const home = new Button(this, VIEW_W - 122, h / 2 - 4, { size: 26, height: 22, icon: 'icon-home' }, () => {
       sfx.tap();
-      this.scene.start('map');
+      this.goHome();
     });
     card.add(home);
-    if (last) {
+    if (last) say('sayAllDone', t('sayAllDone'));
+    if (!next) {
       home.setColor(PAL.green);
-      say('sayAllDone', t('sayAllDone'));
     } else {
       const next = new Button(
         this,

@@ -119,24 +119,136 @@ function led(scene: Phaser.Scene, key: string, dome: number, light: number, rim:
   p.addTo(scene, key);
 }
 
-function resistor(scene: Phaser.Scene): void {
+/** Resistor values that have their own texture (others use the nearest). */
+export const RESISTOR_VALUES = [47, 100, 220, 470, 1000];
+
+/** Colour-code digits: 0 black, 1 brown, 2 red, 4 yellow, 7 violet (approximated with the palette). */
+const DIGIT_COLORS: Record<number, number> = {
+  0: PAL.ink,
+  1: PAL.plum,
+  2: PAL.red,
+  3: PAL.orange,
+  4: PAL.yellow,
+  7: PAL.blue,
+};
+
+/**
+ * Resistor with real colour bands. Bigger values get a bigger, warmer body:
+ * "a bigger speed bump" the child can see.
+ */
+function resistor(scene: Phaser.Scene, ohms: number): void {
   const span = PART_DEFS.resistor.span;
   const p = new Px(partWidth(span), 16);
-  const x0 = 10;
-  const x1 = p.w - 10;
+  const big = ohms >= 470;
+  const x0 = big ? 8 : 10;
+  const x1 = p.w - x0;
+  const y0 = big ? 4 : 5;
+  const h = big ? 9 : 7;
   leads(p, span, x0, x1);
-  p.rect(x0, 5, x1 - x0, 7, PAL.cyan);
-  p.rect(x0, 5, x1 - x0, 1, PAL.white).rect(x0, 11, x1 - x0, 1, PAL.teal);
-  p.clear(x0, 5, 1, 1).clear(x1 - 1, 5, 1, 1).clear(x0, 11, 1, 1).clear(x1 - 1, 11, 1, 1);
-  // 100 Ω: brown, black, brown, gold
+  const body = big ? PAL.orange : PAL.cyan;
+  const shade = big ? PAL.red : PAL.teal;
+  p.rect(x0, y0, x1 - x0, h, body);
+  p.rect(x0, y0, x1 - x0, 1, PAL.white).rect(x0, y0 + h - 1, x1 - x0, 1, shade);
+  p.clear(x0, y0, 1, 1).clear(x1 - 1, y0, 1, 1).clear(x0, y0 + h - 1, 1, 1).clear(x1 - 1, y0 + h - 1, 1, 1);
+  const digits = String(ohms);
+  const first = Number(digits[0]);
+  const second = Number(digits[1] ?? 0);
+  const zeros = Math.max(0, digits.length - 2);
   const bands: [number, number][] = [
-    [x0 + 3, PAL.plum],
-    [x0 + 6, PAL.ink],
-    [x0 + 9, PAL.plum],
-    [x1 - 4, PAL.yellow],
+    [x0 + 3, DIGIT_COLORS[first] ?? PAL.ink],
+    [x0 + 6, DIGIT_COLORS[second] ?? PAL.ink],
+    [x0 + 9, DIGIT_COLORS[zeros] ?? PAL.ink],
+    [x1 - 4, big ? PAL.white : PAL.yellow],
   ];
-  for (const [x, c] of bands) p.rect(x, 5, 2, 7, c);
-  p.addTo(scene, 'part-resistor');
+  for (const [x, c] of bands) p.rect(x, y0, 2, h, c);
+  p.addTo(scene, `part-resistor-${ohms}`);
+}
+
+export const resistorTextureKey = (ohms = 100): string => {
+  const nearest = RESISTOR_VALUES.reduce((a, b) => (Math.abs(b - ohms) < Math.abs(a - ohms) ? b : a));
+  return `part-resistor-${nearest}`;
+};
+
+function button(scene: Phaser.Scene, down: boolean): void {
+  const span = PART_DEFS.button.span;
+  const p = new Px(partWidth(span), 16);
+  const cx = p.w / 2;
+  leads(p, span, cx - 7, cx + 7);
+  p.rect(cx - 7, 1, 14, 14, PAL.charcoal).rect(cx - 7, 1, 14, 1, PAL.slate).rect(cx - 7, 14, 14, 1, PAL.ink);
+  // Corner screws.
+  for (const [x, y] of [
+    [cx - 6, 2],
+    [cx + 5, 2],
+    [cx - 6, 13],
+    [cx + 5, 13],
+  ]) {
+    p.px(x, y, PAL.silver);
+  }
+  if (down) {
+    p.disc(cx, 8, 4, PAL.plum).disc(cx, 8.5, 3, PAL.red);
+  } else {
+    p.disc(cx, 8, 5, PAL.plum).disc(cx - 0.5, 7.5, 4.5, PAL.red).disc(cx - 1.5, 6.5, 1.5, PAL.orange);
+  }
+  p.addTo(scene, down ? 'part-button-down' : 'part-button');
+}
+
+function fan(scene: Phaser.Scene): void {
+  const span = PART_DEFS.fan.span;
+  const p = new Px(partWidth(span), 16);
+  const cx = p.w / 2;
+  leads(p, span, cx - 7, cx + 7);
+  p.disc(cx, 8, 7.5, PAL.ink).disc(cx, 8, 6.5, PAL.slate).disc(cx, 8, 5.5, PAL.charcoal);
+  // "+" by pin 0.
+  p.rect(5, 2, 3, 1, PAL.red).rect(6, 1, 1, 3, PAL.red);
+  p.addTo(scene, 'part-fan');
+  // Blades: a separate sprite that spins.
+  const b = new Px(12, 12);
+  b.map(0, 0, [
+    '.....ww.....',
+    '.....ww.....',
+    '....www.....',
+    '....ww......',
+    '.....w......',
+    'www..ss..ww.',
+    'wwwwwss.wwww',
+    '......w..www',
+    '......ww....',
+    '.....www....',
+    '.....ww.....',
+    '.....ww.....',
+  ], { w: PAL.sky, s: PAL.white });
+  b.addTo(scene, 'fan-blades');
+}
+
+function buzzer(scene: Phaser.Scene): void {
+  const span = PART_DEFS.buzzer.span;
+  const p = new Px(partWidth(span), 16);
+  const cx = p.w / 2;
+  leads(p, span, cx - 7, cx + 7);
+  p.disc(cx, 8, 7.5, PAL.ink).disc(cx - 0.5, 7.5, 6.5, PAL.charcoal);
+  p.disc(cx, 8, 2, PAL.ink);
+  p.px(cx - 4, 4, PAL.slate).px(cx - 3, 3, PAL.slate);
+  p.rect(5, 2, 3, 1, PAL.red).rect(6, 1, 1, 3, PAL.red);
+  p.addTo(scene, 'part-buzzer');
+  const w = new Px(9, 11);
+  w.map(0, 0, ['x........', '.x...x...', '..x...x..', '..x...x..', '..x...x..', '..x...x..', '..x...x..', '..x...x..', '..x...x..', '.x...x...', 'x........'], {
+    x: PAL.white,
+  });
+  w.addTo(scene, 'icon-wave');
+}
+
+function pot(scene: Phaser.Scene): void {
+  const span = PART_DEFS.pot.span;
+  const p = new Px(partWidth(span), 16);
+  const cx = p.w / 2;
+  leads(p, span, cx - 7, cx + 7);
+  p.rect(cx - 7, 1, 14, 14, PAL.blue).rect(cx - 7, 1, 14, 1, PAL.sky).rect(cx - 7, 14, 14, 1, PAL.navy);
+  // Scale marks from dim (left) to bright (right).
+  p.px(cx - 6, 12, PAL.navy).px(cx + 5, 12, PAL.yellow);
+  p.addTo(scene, 'part-pot');
+  const k = new Px(11, 11);
+  k.disc(5.5, 5.5, 5.5, PAL.slate).disc(5, 5, 4.5, PAL.white).rect(5, 1, 1, 4, PAL.ink);
+  k.addTo(scene, 'pot-knob');
 }
 
 function switchPart(scene: Phaser.Scene, closed: boolean): void {
@@ -300,6 +412,20 @@ const ICONS: Record<string, string[]> = {
     'xxxxxxxxxx',
     'xxxxxxxxxx',
   ],
+  download: [
+    '....xxxx....',
+    '....xxxx....',
+    '....xxxx....',
+    '....xxxx....',
+    '.xxxxxxxxxx.',
+    '..xxxxxxxx..',
+    '...xxxxxx...',
+    '....xxxx....',
+    '.....xx.....',
+    '............',
+    'xxxxxxxxxxxx',
+    'xxxxxxxxxxxx',
+  ],
   check: [
     '..........x',
     '.........xx',
@@ -395,11 +521,15 @@ export const ledTextureKey = (color: LedColor, on: boolean): string => `part-led
 
 export function partTextureKey(
   type: string,
-  props: { color?: LedColor; closed?: boolean },
+  props: { color?: LedColor; closed?: boolean; resistance?: number },
   lit = false,
   rot = 0,
 ): string {
   switch (type) {
+    case 'resistor':
+      return resistorTextureKey(props.resistance);
+    case 'button':
+      return props.closed ? 'part-button-down' : 'part-button';
     case 'battery':
       return rot % 2 === 1 ? 'part-battery-v' : 'part-battery';
     case 'led':
@@ -415,7 +545,12 @@ export function partTextureKey(
 export function createTextures(scene: Phaser.Scene): void {
   battery(scene, false);
   battery(scene, true);
-  resistor(scene);
+  RESISTOR_VALUES.forEach((ohms) => resistor(scene, ohms));
+  button(scene, false);
+  button(scene, true);
+  fan(scene);
+  buzzer(scene);
+  pot(scene);
   switchPart(scene, false);
   switchPart(scene, true);
   const shades: Record<LedColor, [number, number, number, number]> = {

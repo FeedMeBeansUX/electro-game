@@ -27,7 +27,8 @@ Add `?level=N` to the URL to jump straight into level N.
 - **Draw a wire:** drag from one hole to another. The tray shows how many wires are left.
 - **Move a wire end:** drag the end of a wire you placed. Drop it on the tray to take the wire back.
 - **Place a part:** drag it from the tray onto the board. Drag it back to the tray to remove it.
-- **Turn a part:** tap it.
+- **Turn a part:** tap it. Parts also turn themselves when dropped, if that connects them to the wires.
+- **Switches, buttons and knobs:** tap a switch to flip it, hold a push button down, tap the knob to turn it a step. This still works after a level is done, so he can keep playing with it.
 - **Hear the task again:** the speaker button.
 - **Stuck?** Vonkje, the spark, helps after a while: first pointing, then showing how, and finally doing one step.
 
@@ -39,6 +40,17 @@ Press and **hold the gear** (top right) for 1.5 seconds. There you can:
 - turn the voice and the sound effects on or off
 - open all levels, or reset progress
 - read what each level teaches
+- make your own levels (see below)
+
+## Making levels
+
+In the parent corner, choose **Level maken** (make a level):
+
+1. **Bouwen** (build): drag parts from the bottom onto the board and draw wires until the circuit works. The status says **Werkt!** (works) when it does, counting switches as on and knobs as turned up.
+2. **Weghalen** (take away): tap the pieces your child should put in. They turn see-through.
+3. Pick the goal at the top (LED, fan or buzzer), then use the buttons at the top right: ▶ try it, ✓ save it to **Mijn levels** (a page on the map, on this device only), or ⬇ download it as a level file.
+
+To add a downloaded level to the game for good, put the file in `levels/worldN/`, set its `world` and `index`, give it a proper title, intro and parent note, and run `npm test` (the tests check the level is solvable) and `npm run voice-lines`.
 
 ## Recording the voice
 
@@ -54,7 +66,8 @@ src/goals     level goal checks
 src/hints     next-step hints, worked out from each level's solution
 src/levels    level loading (levels themselves live in /levels/*.json)
 src/i18n      Dutch/English string table
-src/scenes    Phaser scenes (boot, title, map, level, parent corner)
+src/scenes    Phaser scenes (boot, title, map, level, level editor, parent corner)
+src/editor    turning an editor board into a level
 src/ui        two-line Dutch/English label, buttons, mascot, hint overlay, parent gate
 src/art       palette and procedurally drawn pixel art
 src/audio     voice (recordings with text-to-speech fallback) and synthesized sound effects
@@ -65,4 +78,6 @@ tests/        Vitest unit tests
 
 ## Level format
 
-Each level is a JSON file in `levels/worldN/`. It lists the fixed parts and wires, any movable pre-placed parts, the player's inventory, the goals, a note for the parent, and one known `solution`. The test suite checks that every level is unsolved at the start and solved by its solution, so a broken level fails CI. The hint system uses the same solution to show the next step.
+Each level is a JSON file in `levels/worldN/`. It lists the fixed parts and wires, any movable pre-placed parts, the player's inventory, the goals, a note for the parent, and one known `solution`.
+
+Goal types: `ledOn` (optionally `minBrightness`, `maxBrightness`, `count`), `fanSpinning`, `buzzerOn`, and `truthTable` (an output that must follow switches or buttons as AND, OR or a custom table; with `live` the child also has to try it). The test suite checks that every level is unsolved at the start and solved by its solution, so a broken level fails CI. The hint system uses the same solution to show the next step.

@@ -1,0 +1,142 @@
+{
+  "id": "w3-l3",
+  "world": 3,
+  "index": 3,
+  "title": {
+    "nl": "Zacht licht",
+    "en": "Soft light"
+  },
+  "intro": {
+    "nl": "Het is bedtijd. Maak een zacht nachtlampje: niet te fel! Welke drempel kies je?",
+    "en": "It's bedtime. Make a soft night light: not too bright! Which speed bump do you pick?"
+  },
+  "parentNote": {
+    "nl": "Een grotere weerstand laat minder stroom door, dus het lampje brandt zachter.",
+    "en": "A bigger resistor lets less current through, so the LED shines more softly."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "resistor",
+      "count": 1,
+      "props": {
+        "resistance": 100
+      }
+    },
+    {
+      "type": "resistor",
+      "count": 1,
+      "props": {
+        "resistance": 1000
+      }
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "minBrightness": 0.05,
+      "maxBrightness": 0.3
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "resistor",
+      "pos": [
+        11,
+        1
+      ],
+      "rot": 1,
+      "props": {
+        "resistance": 1000
+      }
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 1000
+        }
+      }
+    ],
+    "wires": []
+  }
+}

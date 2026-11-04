@@ -1,0 +1,167 @@
+{
+  "id": "w3-l2",
+  "world": 3,
+  "index": 2,
+  "title": {
+    "nl": "Twee lampjes",
+    "en": "Two lights"
+  },
+  "intro": {
+    "nl": "Kun je een tweede lampje laten branden? Zet het op de lichte plek.",
+    "en": "Can you make a second light shine? Put it on the glowing spot."
+  },
+  "parentNote": {
+    "nl": "Twee lampjes naast elkaar (parallel) krijgen allebei de volle spanning en branden allebei fel.",
+    "en": "Two LEDs side by side (in parallel) both get the full voltage, so both shine brightly."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led1",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 47
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          0
+        ],
+        "to": [
+          5,
+          2
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          7,
+          2
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "led",
+      "count": 1,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "count": 2,
+      "minBrightness": 0.4
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "led",
+      "pos": [
+        6,
+        2
+      ],
+      "rot": 0,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "led",
+        "pos": [
+          6,
+          2
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": []
+  }
+}

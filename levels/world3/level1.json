@@ -1,0 +1,113 @@
+{
+  "id": "w3-l1",
+  "world": 3,
+  "index": 1,
+  "title": {
+    "nl": "De ventilator",
+    "en": "The fan"
+  },
+  "intro": {
+    "nl": "Zet de ventilator erin en laat hem draaien. Draai hem daarna eens om: wat gebeurt er met de wind?",
+    "en": "Put the fan in and make it spin. Then turn it around: what happens to the wind?"
+  },
+  "parentNote": {
+    "nl": "Een motor draait de andere kant op als de stroom de andere kant op gaat.",
+    "en": "A motor spins the other way when the current flows the other way."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          0
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "fan",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "fanSpinning",
+      "minSpeed": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "fan",
+      "pos": [
+        6,
+        0
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "fan",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0
+      }
+    ],
+    "wires": []
+  }
+}

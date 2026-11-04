@@ -1,0 +1,135 @@
+{
+  "id": "w2-l2",
+  "world": 2,
+  "index": 2,
+  "title": {
+    "nl": "De schakelaar",
+    "en": "The switch"
+  },
+  "intro": {
+    "nl": "Zet de schakelaar erin en zet hem aan. Dan gaat de ventilator draaien!",
+    "en": "Put the switch in and turn it on. Then the fan will spin!"
+  },
+  "parentNote": {
+    "nl": "Een schakelaar blijft aan of uit staan, ook als je hem loslaat.",
+    "en": "A switch stays on or off, even when you let go of it."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "fan",
+        "type": "fan",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          0
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "switch",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "fanSpinning",
+      "minSpeed": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "switch",
+      "pos": [
+        6,
+        4
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "switch",
+        "pos": [
+          6,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": []
+  }
+}

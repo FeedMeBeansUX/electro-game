@@ -46,8 +46,9 @@ export interface LevelDef {
   /** Faint outlines showing where a part could go. */
   hintSpots?: LevelPartSpec[];
   /**
-   * One known solution: what the player adds. A part whose id matches a `placed`
-   * part means "move/turn that part to here". Used by the tests to prove the
+   * One known solution: what the player adds. A part whose id matches a level
+   * part means "move/turn/set that part like this" (e.g. `"props": {"closed": true}`
+   * to switch a fixed switch on). Used by the tests to prove the
    * level is solvable, and by the hint system to show the next step.
    */
   solution: { parts: LevelPartSpec[]; wires: LevelWireSpec[] };
@@ -90,12 +91,13 @@ export function buildLevelBoard(level: LevelDef): Board {
 export function applySolution(level: LevelDef, board: Board): boolean {
   let ok = true;
   level.solution.parts.forEach((spec, i) => {
-    const existing = spec.id ? board.parts.find((p) => p.id === spec.id && !p.fixed) : undefined;
+    const existing = spec.id ? board.parts.find((p) => p.id === spec.id) : undefined;
     const target = partFromSpec(spec, `solution-part-${i}`, false);
     if (!canPlacePart(board, target, existing?.id)) ok = false;
     if (existing) {
       existing.pos = target.pos;
       existing.rot = target.rot;
+      existing.props = { ...existing.props, ...spec.props };
     } else {
       board.parts.push(target);
     }
@@ -107,4 +109,12 @@ export function applySolution(level: LevelDef, board: Board): boolean {
     board.wires.push(wireFromSpec(board, spec, `solution-wire-${i}`, false, i));
   });
   return ok;
+}
+
+/** Whether a part belongs in an inventory slot: same type, and the same value where that matters. */
+export function matchesItem(item: InventoryItem, part: Pick<PlacedPart, 'type' | 'props'>): boolean {
+  if (item.type !== part.type) return false;
+  const def = PART_DEFS[part.type].defaults;
+  const want = { ...def, ...item.props };
+  return (want.resistance ?? null) === (part.props.resistance ?? null) && (want.color ?? null) === (part.props.color ?? null);
 }

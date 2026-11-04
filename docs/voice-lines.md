@@ -28,6 +28,11 @@ Tips: trim the silence at the start and end, and keep the volume about the same 
 | `sayHintPlace.mp3` | Sleep het onderdeel uit de bak naar het bord. | Drag the part from the tray onto the board. |
 | `sayHintTurn.mp3` | Tik op het onderdeel om het te draaien. | Tap the part to turn it. |
 | `sayHintHelp.mp3` | Kijk, ik help je een beetje. | Look, I'll help you a bit. |
+| `sayTooBright.mp3` | Het lampje is te fel. Kun je het zachter maken? | The light is too bright. Can you make it softer? |
+| `sayTooDim.mp3` | Het lampje is nog te zacht. Kun je het feller maken? | The light is still too dim. Can you make it brighter? |
+| `sayHintSwitch.mp3` | Tik op de schakelaar om hem aan te zetten. | Tap the switch to turn it on. |
+| `sayHintPress.mp3` | Druk op de knop en houd hem vast. | Press the button and hold it down. |
+| `sayHintKnob.mp3` | Tik op de draaiknop om eraan te draaien. | Tap the knob to turn it. |
 | `sayAllDone.mp3` | Super! Je hebt alle levels van deze wereld gedaan. | Great! You finished all the levels in this world. |
 
 ## Level introductions
@@ -40,3 +45,13 @@ Tips: trim the silence at the start and end, and keep the volume about the same 
 | `w1-l4-intro.mp3` | Oei, het lampje zit verkeerd om! Stroom gaat maar één kant op door een lampje. Tik op het lampje om het te draaien. | Oops, the light is the wrong way around! Current only goes one way through a light. Tap the light to turn it. |
 | `w1-l5-intro.mp3` | Dit lampje heeft een weerstand nodig. Een weerstand is een drempel voor de stroom. Wat gebeurt er als je een draadje gebruikt? | This light needs a resistor. A resistor is a speed bump for the current. What happens if you use a wire instead? |
 | `w1-l6-intro.mp3` | Nu bouw je alles zelf! Een batterij, een weerstand, een lampje en draadjes. Laat het lampje branden. | Now you build everything yourself! A battery, a resistor, a light and wires. Make the light shine. |
+| `w2-l1-intro.mp3` | Zet de drukknop in het gat. Druk erop en houd vast: dan gaat het lampje aan! | Put the push button in the gap. Press it and hold: then the light turns on! |
+| `w2-l2-intro.mp3` | Zet de schakelaar erin en zet hem aan. Dan gaat de ventilator draaien! | Put the switch in and turn it on. Then the fan will spin! |
+| `w2-l3-intro.mp3` | Het lampje mag alleen aan als allebei de schakelaars aan staan. Maak de kring dicht en zet ze allebei aan. | The light may only turn on when both switches are on. Close the circuit and turn them both on. |
+| `w2-l4-intro.mp3` | Er zijn twee deurbellen. Het lampje moet aangaan als je op de ene óf op de andere drukt. | There are two doorbells. The light must turn on when you press one or the other. |
+| `w2-l5-intro.mp3` | Maak een echte deurbel! Zet de zoemer erin en druk op de knop. | Make a real doorbell! Put the buzzer in and press the button. |
+| `w3-l1-intro.mp3` | Zet de ventilator erin en laat hem draaien. Draai hem daarna eens om: wat gebeurt er met de wind? | Put the fan in and make it spin. Then turn it around: what happens to the wind? |
+| `w3-l2-intro.mp3` | Kun je een tweede lampje laten branden? Zet het op de lichte plek. | Can you make a second light shine? Put it on the glowing spot. |
+| `w3-l3-intro.mp3` | Het is bedtijd. Maak een zacht nachtlampje: niet te fel! Welke drempel kies je? | It's bedtime. Make a soft night light: not too bright! Which speed bump do you pick? |
+| `w3-l4-intro.mp3` | Tik op de draaiknop. Kun je het lampje zo fel mogelijk maken? | Tap the knob. Can you make the light as bright as it can go? |
+| `w3-l5-intro.mp3` | Bouw een slaapkamerlamp met een schakelaar en een draaiknop. Zet hem aan en maak het licht gezellig zacht. | Build a bedroom lamp with a switch and a knob. Turn it on and make the light nice and soft. |

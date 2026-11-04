@@ -13,6 +13,11 @@ export const SHORT_CIRCUIT_AMPS = 1;
 export const LED_REVERSED_VOLTS = 0.5;
 /** Currents below this are treated as no current (for animation). */
 export const MIN_VISIBLE_AMPS = 1e-5;
+/** Fan current that counts as full speed, and the least current that turns it at all. */
+export const FAN_FULL_AMPS = 0.06;
+export const FAN_START_AMPS = 0.005;
+/** Buzzer current needed for it to sound. */
+export const BUZZER_ON_AMPS = 0.01;
 
 export interface LedState {
   kind: 'led';
@@ -29,12 +34,25 @@ export interface BatteryState {
   shorted: boolean;
 }
 
+export interface FanState {
+  kind: 'fan';
+  amps: number;
+  /** -1..1: speed and direction (positive = current from pin 0 to pin 1). */
+  speed: number;
+}
+
+export interface BuzzerState {
+  kind: 'buzzer';
+  amps: number;
+  on: boolean;
+}
+
 export interface PassiveState {
   kind: 'passive';
   amps: number;
 }
 
-export type PartState = LedState | BatteryState | PassiveState;
+export type PartState = LedState | BatteryState | FanState | BuzzerState | PassiveState;
 
 export interface BoardEval {
   parts: Map<string, PartState>;
@@ -95,6 +113,11 @@ export function evaluateBoard(board: Board, excluded: ReadonlySet<string> = new 
       const isShort = amps > SHORT_CIRCUIT_AMPS;
       shorted ||= isShort;
       parts.set(p.id, { kind: 'battery', amps, shorted: isShort });
+    } else if (p.type === 'fan') {
+      const mag = Math.abs(amps) < FAN_START_AMPS ? 0 : Math.min(1, Math.abs(amps) / FAN_FULL_AMPS);
+      parts.set(p.id, { kind: 'fan', amps, speed: Math.sign(amps) * mag });
+    } else if (p.type === 'buzzer') {
+      parts.set(p.id, { kind: 'buzzer', amps, on: amps > BUZZER_ON_AMPS });
     } else {
       parts.set(p.id, { kind: 'passive', amps });
     }

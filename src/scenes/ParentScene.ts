@@ -77,6 +77,17 @@ export class ParentScene extends Phaser.Scene {
       this.showLevelNotes();
     });
     this.content.add(notes);
+    y += 27;
+    const make = this.add
+      .rectangle(PANEL.x + 16, y - 3, PANEL.w - 32, 24, PAL.green)
+      .setOrigin(0)
+      .setInteractive({ useHandCursor: true });
+    make.on('pointerup', () => {
+      sfx.tap();
+      this.scene.stop(this.from);
+      this.scene.start('editor');
+    });
+    this.content.add([make, new Label(this, PANEL.x + 26, y, t('makeLevel'), { size: 8, align: 'left' })]);
   }
 
   private toggleRow(y: number, label: Txt, key: BoolSetting): void {

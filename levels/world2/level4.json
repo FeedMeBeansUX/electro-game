@@ -1,0 +1,186 @@
+{
+  "id": "w2-l4",
+  "world": 2,
+  "index": 4,
+  "title": {
+    "nl": "Twee deurbellen",
+    "en": "Two doorbells"
+  },
+  "intro": {
+    "nl": "Er zijn twee deurbellen. Het lampje moet aangaan als je op de ene óf op de andere drukt.",
+    "en": "There are two doorbells. The light must turn on when you press one or the other."
+  },
+  "parentNote": {
+    "nl": "Twee knoppen naast elkaar: de stroom kan door de ene of door de andere. Dat heet OF.",
+    "en": "Two buttons side by side: the current can go through either one. That's called OR."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      },
+      {
+        "id": "b1",
+        "type": "button",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0
+      },
+      {
+        "id": "b2",
+        "type": "button",
+        "pos": [
+          6,
+          4
+        ],
+        "rot": 0
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "wire",
+      "count": 2
+    }
+  ],
+  "goals": [
+    {
+      "kind": "truthTable",
+      "inputs": [
+        "b1",
+        "b2"
+      ],
+      "output": "led",
+      "expect": "or",
+      "live": true
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "id": "b1",
+        "type": "button",
+        "pos": [
+          6,
+          3
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          7,
+          3
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          3
+        ],
+        "to": [
+          5,
+          4
+        ]
+      }
+    ]
+  }
+}

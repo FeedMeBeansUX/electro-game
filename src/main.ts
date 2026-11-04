@@ -4,6 +4,7 @@ import { TitleScene } from './scenes/TitleScene';
 import { LevelScene } from './scenes/LevelScene';
 import { MapScene } from './scenes/MapScene';
 import { ParentScene } from './scenes/ParentScene';
+import { EditorScene } from './scenes/EditorScene';
 import { PAL, hex } from './art/palette';
 
 new Phaser.Game({
@@ -18,7 +19,7 @@ new Phaser.Game({
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, TitleScene, MapScene, LevelScene, ParentScene],
+  scene: [BootScene, TitleScene, MapScene, LevelScene, EditorScene, ParentScene],
 });
 
 // Offline support (production builds only, so the dev server always serves fresh files).

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canPlacePart, canPlaceWire, pinCells, routeWire, type Board } from '../src/board/board';
+import { bestRotation, canPlacePart, canPlaceWire, pinCells, routeWire, type Board } from '../src/board/board';
 
 const emptyBoard = (): Board => ({ cols: 24, rows: 11, parts: [], wires: [] });
 
@@ -57,5 +57,20 @@ describe('wires', () => {
     expect(routeWire(b, { x: 1, y: 1 }, { x: 6, y: 4 })).toEqual([{ x: 1, y: 1 }, { x: 6, y: 1 }, { x: 6, y: 4 }]);
     b.parts.push({ id: 'r', type: 'resistor', pos: { x: 4, y: 1 }, rot: 0, fixed: false, props: {} });
     expect(routeWire(b, { x: 1, y: 1 }, { x: 6, y: 4 })).toEqual([{ x: 1, y: 1 }, { x: 1, y: 4 }, { x: 6, y: 4 }]);
+  });
+});
+
+describe('bestRotation (smart drop)', () => {
+  it('turns a part so its pins meet the wire ends', () => {
+    const b = emptyBoard();
+    b.wires.push({ id: 'a', points: [{ x: 5, y: 0 }, { x: 5, y: 3 }], fixed: true, color: 0 });
+    b.wires.push({ id: 'b', points: [{ x: 5, y: 5 }, { x: 5, y: 8 }], fixed: true, color: 0 });
+    // A switch dropped horizontally at (5,4) would miss both wire ends; upright it meets both.
+    expect(bestRotation(b, { type: 'switch', pos: { x: 5, y: 4 }, rot: 0 })).toBe(1);
+  });
+
+  it('keeps the rotation when turning does not help', () => {
+    const b = emptyBoard();
+    expect(bestRotation(b, { type: 'led', pos: { x: 5, y: 4 }, rot: 2 })).toBe(2);
   });
 });

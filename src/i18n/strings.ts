@@ -18,6 +18,27 @@ export const STRINGS = {
   allDone: { nl: 'Alles gelukt!', en: 'All done!' },
   mascotName: { nl: 'Vonkje', en: 'Vonkje (Little Spark)' },
   world1: { nl: 'Wereld 1: Licht aan!', en: 'World 1: Lights on!' },
+  world2: { nl: 'Wereld 2: Knopjes en schakelaars', en: 'World 2: Buttons and switches' },
+  world3: { nl: 'Wereld 3: Meer aan de stroom', en: 'World 3: More things to power' },
+  myLevels: { nl: 'Mijn levels', en: 'My levels' },
+
+  // Level editor (parent corner)
+  makeLevel: { nl: 'Level maken', en: 'Make a level' },
+  editorBuild: { nl: 'Bouwen', en: 'Build' },
+  editorMark: { nl: 'Weghalen', en: 'Take away' },
+  editorStepBuild: { nl: '1. Bouw een kring die werkt.', en: '1. Build a circuit that works.' },
+  editorStepMark: {
+    nl: '2. Tik op de stukjes die het kind zelf moet neerzetten.',
+    en: '2. Tap the pieces the child has to put in.',
+  },
+  editorWorks: { nl: 'Werkt!', en: 'Works!' },
+  editorNotWorking: { nl: 'Werkt nog niet', en: 'Not working yet' },
+  editorNeedMark: { nl: 'Haal eerst iets weg voor het kind', en: 'First take something away for the child' },
+  editorSaved: { nl: 'Bewaard bij Mijn levels', en: 'Saved to My levels' },
+  editorExported: { nl: 'Bestand gedownload', en: 'File downloaded' },
+  customLevelTitle: { nl: 'Mijn level', en: 'My level' },
+  customIntro: { nl: 'Maak de kring af!', en: 'Finish the circuit!' },
+  customNote: { nl: 'Zelfgemaakt level.', en: 'A home-made level.' },
 
   // Parent corner
   parentCorner: { nl: 'Ouderhoek', en: 'Parent corner' },
@@ -37,6 +58,10 @@ export const STRINGS = {
   partLed: { nl: 'Lampje', en: 'LED' },
   partResistor: { nl: 'Weerstand', en: 'Resistor' },
   partSwitch: { nl: 'Schakelaar', en: 'Switch' },
+  partButton: { nl: 'Drukknop', en: 'Push button' },
+  partFan: { nl: 'Ventilator', en: 'Fan' },
+  partBuzzer: { nl: 'Zoemer', en: 'Buzzer' },
+  partPot: { nl: 'Draaiknop', en: 'Potentiometer' },
 
   // Spoken feedback
   sayWireHowTo: {
@@ -82,6 +107,26 @@ export const STRINGS = {
   sayHintHelp: {
     nl: 'Kijk, ik help je een beetje.',
     en: "Look, I'll help you a bit.",
+  },
+  sayTooBright: {
+    nl: 'Het lampje is te fel. Kun je het zachter maken?',
+    en: 'The light is too bright. Can you make it softer?',
+  },
+  sayTooDim: {
+    nl: 'Het lampje is nog te zacht. Kun je het feller maken?',
+    en: 'The light is still too dim. Can you make it brighter?',
+  },
+  sayHintSwitch: {
+    nl: 'Tik op de schakelaar om hem aan te zetten.',
+    en: 'Tap the switch to turn it on.',
+  },
+  sayHintPress: {
+    nl: 'Druk op de knop en houd hem vast.',
+    en: 'Press the button and hold it down.',
+  },
+  sayHintKnob: {
+    nl: 'Tik op de draaiknop om eraan te draaien.',
+    en: 'Tap the knob to turn it.',
   },
   sayAllDone: {
     nl: 'Super! Je hebt alle levels van deze wereld gedaan.',

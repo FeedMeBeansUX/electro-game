@@ -1,0 +1,163 @@
+{
+  "id": "w3-l5",
+  "world": 3,
+  "index": 5,
+  "title": {
+    "nl": "De slaapkamerlamp",
+    "en": "The bedroom lamp"
+  },
+  "intro": {
+    "nl": "Bouw een slaapkamerlamp met een schakelaar en een draaiknop. Zet hem aan en maak het licht gezellig zacht.",
+    "en": "Build a bedroom lamp with a switch and a knob. Turn it on and make the light nice and soft."
+  },
+  "parentNote": {
+    "nl": "Een schakelaar voor aan en uit, een draaiknop voor hoe fel. Zo werkt een echte dimmer.",
+    "en": "A switch for on and off, a knob for how bright. That's how a real dimmer works."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "pot",
+      "count": 1
+    },
+    {
+      "type": "switch",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.15,
+      "maxBrightness": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "pot",
+      "pos": [
+        11,
+        1
+      ],
+      "rot": 1
+    },
+    {
+      "type": "switch",
+      "pos": [
+        6,
+        4
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "pot",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "knob": 0.5
+        }
+      },
+      {
+        "type": "switch",
+        "pos": [
+          6,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": []
+  }
+}

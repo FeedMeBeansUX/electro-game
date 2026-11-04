@@ -1,0 +1,149 @@
+{
+  "id": "w2-l5",
+  "world": 2,
+  "index": 5,
+  "title": {
+    "nl": "De deurbel",
+    "en": "The doorbell"
+  },
+  "intro": {
+    "nl": "Maak een echte deurbel! Zet de zoemer erin en druk op de knop.",
+    "en": "Make a real doorbell! Put the buzzer in and press the button."
+  },
+  "parentNote": {
+    "nl": "Een zoemer werkt maar één kant op, net als een lampje. Met de knop erbij wordt het een deurbel.",
+    "en": "A buzzer only works one way round, like an LED. Add the button and it's a doorbell."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "b",
+        "type": "button",
+        "pos": [
+          6,
+          4
+        ],
+        "rot": 0
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          0
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          11,
+          4
+        ],
+        "to": [
+          7,
+          4
+        ]
+      },
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "buzzer",
+      "count": 1
+    }
+  ],
+  "goals": [
+    {
+      "kind": "truthTable",
+      "inputs": [
+        "b"
+      ],
+      "outputType": "buzzer",
+      "expect": "and",
+      "live": true
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "buzzer",
+      "pos": [
+        6,
+        0
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "buzzer",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0
+      },
+      {
+        "id": "b",
+        "type": "button",
+        "pos": [
+          6,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "closed": true
+        }
+      }
+    ],
+    "wires": []
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LEVELS, applySolution, buildLevelBoard, partFromSpec, wireFromSpec } from '../src/levels/levels';
+import { LEVELS, applySolution, buildLevelBoard, matchesItem, partFromSpec, wireFromSpec } from '../src/levels/levels';
 import { canPlacePart, canPlaceWire, type Board } from '../src/board/board';
 import { evaluateBoard } from '../src/sim/evaluate';
 import { checkGoals } from '../src/goals/goals';
@@ -33,16 +33,20 @@ describe('levels', () => {
       });
 
       it('is not solved at the start', () => {
-        expect(checkGoals(level.goals, evaluateBoard(buildLevelBoard(level))).done).toBe(false);
+        {
+          const start = buildLevelBoard(level);
+          expect(checkGoals(level.goals, evaluateBoard(start), start).done).toBe(false);
+        }
       });
 
       it('is solved by its solution, using only the inventory', () => {
         const board = buildLevelBoard(level);
         expect(applySolution(level, board)).toBe(true);
-        const placedIds = new Set((level.placed ?? []).map((p) => p.id));
+        // Parts already in the level (moved, turned or switched on) cost nothing from the inventory.
+        const placedIds = new Set([...level.fixed.parts, ...(level.placed ?? [])].map((p) => p.id));
         const used = new Map<string, number>();
         for (const s of level.solution.parts) {
-          if (s.id && placedIds.has(s.id)) continue; // moving a pre-placed part costs nothing
+          if (s.id && placedIds.has(s.id)) continue;
           used.set(s.type, (used.get(s.type) ?? 0) + 1);
         }
         if (level.solution.wires.length) used.set('wire', level.solution.wires.length);
@@ -50,7 +54,7 @@ describe('levels', () => {
           const inv = level.inventory.find((it) => it.type === type);
           expect(inv?.count ?? 0, `inventory has enough ${type}`).toBeGreaterThanOrEqual(n);
         }
-        expect(checkGoals(level.goals, evaluateBoard(board)).done).toBe(true);
+        expect(checkGoals(level.goals, evaluateBoard(board), board).done).toBe(true);
       });
     });
   }
@@ -71,5 +75,16 @@ describe('strings', () => {
       expect(txt.nl, key).not.toBe('');
       expect(txt.en, key).not.toBe('');
     }
+  });
+});
+
+describe('matchesItem', () => {
+  it('tells resistors apart by value', () => {
+    const small = { type: 'resistor' as const, count: 1, props: { resistance: 100 } };
+    const big = { type: 'resistor' as const, count: 1, props: { resistance: 1000 } };
+    const part = { type: 'resistor' as const, props: { resistance: 1000 } };
+    expect(matchesItem(small, part)).toBe(false);
+    expect(matchesItem(big, part)).toBe(true);
+    expect(matchesItem({ type: 'wire', count: 1 }, part)).toBe(false);
   });
 });

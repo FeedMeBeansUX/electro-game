@@ -122,7 +122,7 @@ Each world is roughly 5–8 levels. ★ marks a "real, usable circuit" milestone
 5. ★ **Doorbell:** a button and a buzzer.
 
 ### World 3: More things to power
-1. A fan (motor), and fan direction when the battery is flipped.
+1. A fan (motor), and fan direction when it is turned around.
 2. Two LEDs in series vs. in parallel: compare brightness.
 3. Resistor size changes brightness: "a bigger speed bump makes it dimmer".
 4. **Potentiometer** as a dimmer knob and fan speed control.
@@ -201,14 +201,16 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 
 ### Phase 3: Content tools + Worlds 2–3 (≈4–6 weeks)
 **Goal:** make adding levels cheap, then add switches, motors and dimmers.
-- [ ] **In-game level editor** (behind the parent corner): place fixed parts, set the inventory and goals, then export or import JSON. This lets you design levels together with him.
-- [ ] New parts: push button, toggle switch, fan/motor (RPM from current, direction from polarity), buzzer (Web Audio tone), potentiometer (drag a knob).
-- [ ] New goal types: `fanSpinning`, `truthTable` (for the AND/OR switch levels), `brightnessCompare`.
-- [ ] Interactive parts during play: the child can press buttons and flip switches *after* building, and the circuit reacts live.
-- [ ] World 2 and World 3 levels.
-- [ ] Simulator tests for the new parts.
+- [x] **In-game level editor** (behind the parent corner): place fixed parts, set the inventory and goals, then export or import JSON. This lets you design levels together with him. *Built as: build a working circuit, tap the pieces the child must put in, pick the goal (LED / fan / buzzer), then try it, save it to "Mijn levels" on the map, or download it as a level file. Importing a file isn't done yet.*
+- [x] New parts: push button, toggle switch, fan/motor (RPM from current, direction from polarity), buzzer (Web Audio tone), potentiometer. *The knob turns one step per tap instead of dragging, which is easier for small fingers. Resistors now come in values (47 Ω to 1 kΩ) with real colour bands; big ones look bigger.*
+- [x] New goal types: `fanSpinning`, `buzzerOn`, `truthTable` (for the AND/OR switch levels). `brightnessCompare` became min/max brightness and an LED count on `ledOn`, with "too bright" / "too dim" voice feedback.
+- [x] Interactive parts during play: the child can press buttons and flip switches *after* building, and the circuit reacts live. This keeps working after the level is done.
+- [x] World 2 and World 3 levels (5 each). The map has a page per world.
+- [x] Simulator tests for the new parts.
 
 **Exit criteria:** you can build a new level in the editor in under 10 minutes. Worlds 1–3 are playable.
+
+**Status:** built and played through in a browser; 125 tests green. Also new: smart drop (a part turns itself to meet the wires) and hints for switches, buttons and knobs.
 
 ### Phase 4: Real breadboard + semiconductors (≈4–6 weeks)
 **Goal:** teach real breadboard connectivity, transistors and sensors.
