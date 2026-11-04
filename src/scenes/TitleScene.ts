@@ -3,15 +3,15 @@ import { VIEW_H, VIEW_W, fitCamera } from '../view';
 import { PAL, LED_COLORS } from '../art/palette';
 import { Label } from '../ui/Label';
 import { Button } from '../ui/Button';
-import { addEnglishToggle } from '../ui/EnglishToggle';
 import { t } from '../i18n/strings';
 import { say } from '../audio/speech';
+import { sfx, unlockAudio } from '../audio/sfx';
 import { LEVELS } from '../levels/levels';
 
-/** Start index from `?level=N` (1-based), for testing. */
-function startIndex(): number {
+/** Level index from `?level=N` (1-based), to jump straight into a level when testing. */
+function levelFromUrl(): number | null {
   const n = Number(new URLSearchParams(window.location.search).get('level'));
-  return Number.isInteger(n) && n >= 1 && n <= LEVELS.length ? n - 1 : 0;
+  return Number.isInteger(n) && n >= 1 && n <= LEVELS.length ? n - 1 : null;
 }
 
 export class TitleScene extends Phaser.Scene {
@@ -35,11 +35,15 @@ export class TitleScene extends Phaser.Scene {
     new Label(this, VIEW_W / 2, 36, t('gameTitle'), { size: 28, color: PAL.yellow });
 
     const start = () => {
-      say(t('gameTitle'));
-      this.scene.start('level', { index: startIndex() });
+      // Browsers only allow sound and speech after a tap, so unlock them here.
+      unlockAudio();
+      sfx.tap();
+      say('gameTitle', t('gameTitle'));
+      const jump = levelFromUrl();
+      if (jump !== null) this.scene.start('level', { index: jump });
+      else this.scene.start('map');
     };
     new Button(this, VIEW_W / 2, 205, { size: 40, height: 28, color: PAL.green, icon: 'icon-play', iconScale: 1.5 }, start);
     new Label(this, VIEW_W / 2, 226, t('tapToStart'), { size: 9 });
-    addEnglishToggle(this, VIEW_W - 16, 14);
   }
 }

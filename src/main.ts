@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { TitleScene } from './scenes/TitleScene';
 import { LevelScene } from './scenes/LevelScene';
+import { MapScene } from './scenes/MapScene';
+import { ParentScene } from './scenes/ParentScene';
 import { PAL, hex } from './art/palette';
 
 new Phaser.Game({
@@ -16,5 +18,14 @@ new Phaser.Game({
     width: window.innerWidth,
     height: window.innerHeight,
   },
-  scene: [BootScene, TitleScene, LevelScene],
+  scene: [BootScene, TitleScene, MapScene, LevelScene, ParentScene],
 });
+
+// Offline support (production builds only, so the dev server always serves fresh files).
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Not fatal: the game still works online.
+    });
+  });
+}

@@ -1,0 +1,126 @@
+{
+  "id": "w1-l5",
+  "world": 1,
+  "index": 5,
+  "title": {
+    "nl": "De drempel",
+    "en": "The speed bump"
+  },
+  "intro": {
+    "nl": "Dit lampje heeft een weerstand nodig. Een weerstand is een drempel voor de stroom. Wat gebeurt er als je een draadje gebruikt?",
+    "en": "This light needs a resistor. A resistor is a speed bump for the current. What happens if you use a wire instead?"
+  },
+  "parentNote": {
+    "nl": "Zonder weerstand krijgt de LED te veel stroom en gaat hij kapot. De weerstand remt de stroom af.",
+    "en": "Without a resistor the LED gets too much current and breaks. The resistor slows the current down."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "wire",
+      "count": 1
+    },
+    {
+      "type": "resistor",
+      "count": 1,
+      "props": {
+        "resistance": 100
+      }
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "resistor",
+      "pos": [
+        11,
+        1
+      ],
+      "rot": 1
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": []
+  }
+}

@@ -2,12 +2,16 @@
 export interface Settings {
   /** Show the English word in a small line under each Dutch label. */
   showEnglish: boolean;
-  /** Read instructions aloud (placeholder Dutch text-to-speech). */
+  /** Read instructions aloud (recorded voice, or Dutch text-to-speech as a fallback). */
   speech: boolean;
+  /** Clicks, pops and jingles. */
+  sfx: boolean;
+  /** Parent setting: every level can be played without finishing the one before. */
+  unlockAll: boolean;
 }
 
 const KEY = 'electro.settings.v1';
-const DEFAULTS: Settings = { showEnglish: false, speech: true };
+const DEFAULTS: Settings = { showEnglish: false, speech: true, sfx: true, unlockAll: false };
 
 type Listener = (s: Settings) => void;
 const listeners = new Set<Listener>();

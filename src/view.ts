@@ -17,11 +17,16 @@ export interface BoardLayout {
   originY: number;
   cols: number;
   rows: number;
+  /** Whole-number pixel scale for the board and its parts (2 = chunky, for the first levels). */
+  scale: number;
+  /** Hole pitch in logical pixels (CELL × scale). */
+  cell: number;
 }
 
-export function boardLayout(cols: number, rows: number): BoardLayout {
-  const w = (cols - 1) * CELL;
-  const h = (rows - 1) * CELL;
+export function boardLayout(cols: number, rows: number, scale = 1): BoardLayout {
+  const cell = CELL * scale;
+  const w = (cols - 1) * cell;
+  const h = (rows - 1) * cell;
   const top = TOP_BAR_H + 2;
   const bottom = TRAY_Y - 2;
   return {
@@ -29,18 +34,20 @@ export function boardLayout(cols: number, rows: number): BoardLayout {
     originY: Math.round(top + (bottom - top - h) / 2),
     cols,
     rows,
+    scale,
+    cell,
   };
 }
 
 export const cellToWorld = (l: BoardLayout, c: Cell): { x: number; y: number } => ({
-  x: l.originX + c.x * CELL,
-  y: l.originY + c.y * CELL,
+  x: l.originX + c.x * l.cell,
+  y: l.originY + c.y * l.cell,
 });
 
 /** Nearest hole to a world position (may be outside the board). */
 export const worldToCell = (l: BoardLayout, x: number, y: number): Cell => ({
-  x: Math.round((x - l.originX) / CELL),
-  y: Math.round((y - l.originY) / CELL),
+  x: Math.round((x - l.originX) / l.cell),
+  y: Math.round((y - l.originY) / l.cell),
 });
 
 let currentZoom = 1;

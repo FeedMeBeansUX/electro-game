@@ -258,6 +258,59 @@ const ICONS: Record<string, string[]> = {
     '.xx...xx.',
     '..xxxxx..',
   ],
+  home: [
+    '.....xx.....',
+    '....xxxx....',
+    '...xxxxxx...',
+    '..xxxxxxxx..',
+    '.xxxxxxxxxx.',
+    'xxxxxxxxxxxx',
+    '.xxxxxxxxxx.',
+    '.xxx....xxx.',
+    '.xxx....xxx.',
+    '.xxx....xxx.',
+    '.xxx....xxx.',
+    '.xxx....xxx.',
+  ],
+  gear: [
+    '....xxxx....',
+    '.x..xxxx..x.',
+    'xxxxxxxxxxxx',
+    '.xxxx..xxxx.',
+    '.xxx....xxx.',
+    'xxx......xxx',
+    'xxx......xxx',
+    '.xxx....xxx.',
+    '.xxxx..xxxx.',
+    'xxxxxxxxxxxx',
+    '.x..xxxx..x.',
+    '....xxxx....',
+  ],
+  lock: [
+    '...xxxx...',
+    '..xx..xx..',
+    '.xx....xx.',
+    '.x......x.',
+    '.x......x.',
+    'xxxxxxxxxx',
+    'xxxxxxxxxx',
+    'xxxx..xxxx',
+    'xxxx..xxxx',
+    'xxxxx.xxxx',
+    'xxxxxxxxxx',
+    'xxxxxxxxxx',
+  ],
+  check: [
+    '..........x',
+    '.........xx',
+    '........xx.',
+    '.......xx..',
+    'x.....xx...',
+    'xx...xx....',
+    '.xx.xx.....',
+    '..xxx......',
+    '...x.......',
+  ],
   star: [
     '.....x.....',
     '.....x.....',
@@ -272,7 +325,59 @@ const ICONS: Record<string, string[]> = {
   ],
 };
 
+const MASCOT_BODY = [
+  '.......o........',
+  '......oyo.......',
+  '..o...oyo...o...',
+  '..oo.oyyyo.oo...',
+  '...oyyyyyyyo....',
+  '..oyyyyyyyyyo...',
+  '.oyyyyyyyyyyyo..',
+  '.oyywwyyywwyyo..',
+  '.oyywkyyywkyyo..',
+  '.oyyyyyyyyyyyo..',
+  '.oyyyyyyyyyyyo..',
+  '..oyyyyyyyyyo...',
+  '...oyyyyyyyo....',
+  '....ooooooo.....',
+  '....o.....o.....',
+  '...oo.....oo....',
+];
+
+/** Vonkje, the spark mascot: idle, blink and talk frames. */
+function mascot(scene: Phaser.Scene): void {
+  const colors = { o: PAL.orange, y: PAL.yellow, w: PAL.white, k: PAL.ink, m: PAL.red };
+  const frames: Record<string, Record<number, string>> = {
+    idle: { 10: '.oyyyykkkyyyyo..' },
+    blink: { 7: '.oyyyyyyyyyyyo..', 8: '.oyykkyyykkyyo..', 10: '.oyyyykkkyyyyo..' },
+    talk: { 10: '.oyyyymmmyyyyo..', 11: '..oyyymmmyyyo...' },
+  };
+  for (const [name, rows] of Object.entries(frames)) {
+    const map = MASCOT_BODY.map((row, i) => rows[i] ?? row);
+    // Rosy cheeks.
+    const p = new Px(16, 16).map(0, 0, map, colors);
+    p.px(2, 9, PAL.orange).px(12, 9, PAL.orange);
+    p.addTo(scene, `mascot-${name}`);
+  }
+}
+
+const HAND = [
+  '....xx......',
+  '...xwwx.....',
+  '...xwwx.....',
+  '...xwwxxx...',
+  '...xwwwwwxx.',
+  '.xxxwwwwwwwx',
+  'xwwxwwwwwwwx',
+  'xwwwwwwwwwwx',
+  '.xwwwwwwwwwx',
+  '..xwwwwwwwx.',
+  '...xwwwwwx..',
+  '...xxxxxxx..',
+];
+
 function icons(scene: Phaser.Scene): void {
+  new Px(12, 12).map(0, 0, HAND, { x: PAL.ink, w: PAL.white }).addTo(scene, 'hand');
   for (const [name, rows] of Object.entries(ICONS)) {
     const p = new Px(rows[0].length, rows.length);
     p.map(0, 0, rows, { x: PAL.white, w: PAL.silver });
@@ -328,4 +433,5 @@ export function createTextures(scene: Phaser.Scene): void {
   led(scene, 'part-led-popped', PAL.slate, PAL.silver, PAL.charcoal);
   glow(scene);
   icons(scene);
+  mascot(scene);
 }

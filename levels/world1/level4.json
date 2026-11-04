@@ -1,0 +1,119 @@
+{
+  "id": "w1-l4",
+  "world": 1,
+  "index": 4,
+  "title": {
+    "nl": "Verkeerd om",
+    "en": "The wrong way around"
+  },
+  "intro": {
+    "nl": "Oei, het lampje zit verkeerd om! Stroom gaat maar één kant op door een lampje. Tik op het lampje om het te draaien.",
+    "en": "Oops, the light is the wrong way around! Current only goes one way through a light. Tap the light to turn it."
+  },
+  "parentNote": {
+    "nl": "Een LED laat stroom maar één kant op door. Het pootje met de + moet naar de plus van de batterij.",
+    "en": "An LED only lets current through one way. The leg marked + goes towards the battery's plus."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  },
+  "placed": [
+    {
+      "id": "led",
+      "type": "led",
+      "pos": [
+        6,
+        0
+      ],
+      "rot": 2,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "inventory": [],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": []
+  }
+}

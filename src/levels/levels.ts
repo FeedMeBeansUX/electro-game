@@ -1,5 +1,5 @@
 import type { Board, PlacedPart, Wire } from '../board/board';
-import { routeWire } from '../board/board';
+import { canPlacePart, canPlaceWire, routeWire } from '../board/board';
 import type { Rot } from '../board/grid';
 import type { Goal } from '../goals/goals';
 import type { Txt } from '../i18n/strings';
@@ -32,14 +32,24 @@ export interface LevelDef {
   title: Txt;
   /** Spoken (and shown) when the level starts. */
   intro: Txt;
+  /** Short note for the parent corner: what this level teaches. */
+  parentNote: Txt;
   cols: number;
   rows: number;
+  /** Pixel scale of the board (2 = big holes for the first levels). Defaults to 1. */
+  scale?: number;
   fixed: { parts: LevelPartSpec[]; wires: LevelWireSpec[] };
+  /** Parts already on the board that the player may move or turn (e.g. a backwards LED). */
+  placed?: LevelPartSpec[];
   inventory: InventoryItem[];
   goals: Goal[];
   /** Faint outlines showing where a part could go. */
   hintSpots?: LevelPartSpec[];
-  /** One known solution (what the player adds). Used by tests to prove the level is solvable. */
+  /**
+   * One known solution: what the player adds. A part whose id matches a `placed`
+   * part means "move/turn that part to here". Used by the tests to prove the
+   * level is solvable, and by the hint system to show the next step.
+   */
   solution: { parts: LevelPartSpec[]; wires: LevelWireSpec[] };
 }
 
@@ -71,6 +81,30 @@ export function wireFromSpec(board: Board, spec: LevelWireSpec, id: string, fixe
 export function buildLevelBoard(level: LevelDef): Board {
   const board: Board = { cols: level.cols, rows: level.rows, parts: [], wires: [] };
   level.fixed.parts.forEach((s, i) => board.parts.push(partFromSpec(s, `fixed-part-${i}`, true)));
+  (level.placed ?? []).forEach((s, i) => board.parts.push(partFromSpec(s, `placed-part-${i}`, false)));
   level.fixed.wires.forEach((s, i) => board.wires.push(wireFromSpec(board, s, `fixed-wire-${i}`, true, i)));
   return board;
+}
+
+/** Applies the level's solution to a board (parts first, then wires). Returns false if a step doesn't fit. */
+export function applySolution(level: LevelDef, board: Board): boolean {
+  let ok = true;
+  level.solution.parts.forEach((spec, i) => {
+    const existing = spec.id ? board.parts.find((p) => p.id === spec.id && !p.fixed) : undefined;
+    const target = partFromSpec(spec, `solution-part-${i}`, false);
+    if (!canPlacePart(board, target, existing?.id)) ok = false;
+    if (existing) {
+      existing.pos = target.pos;
+      existing.rot = target.rot;
+    } else {
+      board.parts.push(target);
+    }
+  });
+  level.solution.wires.forEach((spec, i) => {
+    const a = { x: spec.from[0], y: spec.from[1] };
+    const b = { x: spec.to[0], y: spec.to[1] };
+    if (!canPlaceWire(board, a, b)) ok = false;
+    board.wires.push(wireFromSpec(board, spec, `solution-wire-${i}`, false, i));
+  });
+  return ok;
 }

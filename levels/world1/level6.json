@@ -1,0 +1,126 @@
+{
+  "id": "w1-l6",
+  "world": 1,
+  "index": 6,
+  "title": {
+    "nl": "Bouw het zelf",
+    "en": "Build it yourself"
+  },
+  "intro": {
+    "nl": "Nu bouw je alles zelf! Een batterij, een weerstand, een lampje en draadjes. Laat het lampje branden.",
+    "en": "Now you build everything yourself! A battery, a resistor, a light and wires. Make the light shine."
+  },
+  "parentNote": {
+    "nl": "Een hele kring zelf bouwen: batterij, weerstand, lampje en draadjes.",
+    "en": "Building a whole circuit alone: battery, resistor, LED and wires."
+  },
+  "cols": 13,
+  "rows": 5,
+  "scale": 2,
+  "fixed": {
+    "parts": [],
+    "wires": []
+  },
+  "inventory": [
+    {
+      "type": "battery",
+      "count": 1,
+      "props": {
+        "voltage": 3
+      }
+    },
+    {
+      "type": "led",
+      "count": 1,
+      "props": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "resistor",
+      "count": 1,
+      "props": {
+        "resistance": 100
+      }
+    },
+    {
+      "type": "wire",
+      "count": 3
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "type": "battery",
+        "pos": [
+          1,
+          2
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "type": "led",
+        "pos": [
+          6,
+          0
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "type": "resistor",
+        "pos": [
+          11,
+          1
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          1,
+          0
+        ],
+        "to": [
+          5,
+          0
+        ]
+      },
+      {
+        "from": [
+          7,
+          0
+        ],
+        "to": [
+          11,
+          0
+        ]
+      },
+      {
+        "from": [
+          11,
+          2
+        ],
+        "to": [
+          1,
+          4
+        ]
+      }
+    ]
+  }
+}

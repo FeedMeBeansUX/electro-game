@@ -186,16 +186,18 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 
 ### Phase 2: Vertical slice: World 1 polished (≈3–4 weeks)
 **Goal:** one world that looks, sounds and feels like the final game.
-- [ ] Final pixel art for the board, battery, wire, LED (several colors), resistor and mascot. Add idle animations.
-- [ ] Juice: snap "click" sounds, sparkle on connect, a celebration animation, LED glow (an additive sprite).
-- [ ] Voice-over pipeline: per-level intro, hints and success lines in Dutch (recorded and normalized, saved as .ogg/.mp3), replacing the text-to-speech placeholder.
-- [ ] Escalating hint system (point → ghost hand → auto-place).
-- [ ] World map / level select with icons and stars, plus save progress in `localStorage`.
-- [ ] Parent corner (long-press gate), with the English-labels setting moved into it.
-- [ ] PWA manifest + offline caching, and test on the actual tablet he'll use.
-- [ ] All six World 1 levels.
+- [~] Final pixel art for the board, battery, wire, LED (several colors), resistor and mascot. Add idle animations. *Done: the mascot Vonkje (idle, blink and talk frames), icons, chunky 2× board for World 1, glow and bounce animations. Still placeholder: the part sprites are drawn by code; hand-made Aseprite art can replace them later.*
+- [x] Juice: snap "click" sounds, sparkle on connect, a celebration animation, LED glow (an additive sprite). Sounds are synthesized, so there are no audio files to manage. The finished circuit runs for about 4 seconds before the "well done" card slides up over the tray, keeping the board visible.
+- [x] Voice-over pipeline: per-level intro, hints and success lines in Dutch (recorded and normalized, saved as .mp3), replacing the text-to-speech placeholder. *The pipeline is ready: drop `<id>.mp3` files into `public/voice/nl/` (list in `docs/voice-lines.md`) and the game uses them; missing lines still fall back to text-to-speech. Recording the lines is still to do.*
+- [x] Escalating hint system (point → ghost hand → auto-place), driven by each level's known solution: after 12 s idle Vonkje points, after 25 s a ghost hand demonstrates, after 45 s Vonkje does the step.
+- [x] World map / level select with icons and stars, plus save progress in `localStorage`. Levels unlock one at a time.
+- [x] Parent corner (hold the gear for 1.5 s), with the English-labels setting moved into it, plus voice, sound effects, "all levels open", reset progress and what each level teaches.
+- [~] PWA manifest + offline caching, and test on the actual tablet he'll use. *Manifest, icons and offline caching done (checked in a browser). Testing on his tablet is still to do.*
+- [x] All six World 1 levels.
 
 **Exit criteria:** he plays World 1 start to finish **without** your help and asks for more.
+
+**Status:** built and tested in a browser; 65 tests green. Still to do: record the voice lines, try it on his tablet, and the playtest.
 
 ### Phase 3: Content tools + Worlds 2–3 (≈4–6 weeks)
 **Goal:** make adding levels cheap, then add switches, motors and dimmers.
