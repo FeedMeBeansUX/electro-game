@@ -1,0 +1,117 @@
+{
+  "id": "w1-l3",
+  "world": 1,
+  "index": 3,
+  "title": {
+    "nl": "Zet het lampje erin",
+    "en": "Put the light in"
+  },
+  "intro": {
+    "nl": "Het lampje is weg! Sleep het lampje naar de goede plek.",
+    "en": "The light is gone! Drag the light to the right spot."
+  },
+  "cols": 24,
+  "rows": 11,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          5,
+          6
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          19,
+          5
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          11,
+          4
+        ]
+      },
+      {
+        "from": [
+          13,
+          4
+        ],
+        "to": [
+          19,
+          4
+        ]
+      },
+      {
+        "from": [
+          19,
+          6
+        ],
+        "to": [
+          5,
+          8
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "led",
+      "count": 1,
+      "props": {
+        "color": "red"
+      }
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "minBrightness": 0.5
+    }
+  ],
+  "hintSpots": [
+    {
+      "type": "led",
+      "pos": [
+        12,
+        4
+      ],
+      "rot": 0
+    }
+  ],
+  "solution": {
+    "parts": [
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          12,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      }
+    ],
+    "wires": []
+  }
+}

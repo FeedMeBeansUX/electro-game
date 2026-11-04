@@ -1,0 +1,105 @@
+{
+  "id": "w1-l2",
+  "world": 1,
+  "index": 2,
+  "title": {
+    "nl": "Twee draadjes",
+    "en": "Two wires"
+  },
+  "intro": {
+    "nl": "Nu missen er twee draadjes. Kun jij de stroom weer laten rondgaan?",
+    "en": "Now two wires are missing. Can you make the current go around again?"
+  },
+  "cols": 24,
+  "rows": 11,
+  "fixed": {
+    "parts": [
+      {
+        "id": "battery",
+        "type": "battery",
+        "pos": [
+          5,
+          6
+        ],
+        "rot": 1,
+        "props": {
+          "voltage": 3
+        }
+      },
+      {
+        "id": "led",
+        "type": "led",
+        "pos": [
+          12,
+          4
+        ],
+        "rot": 0,
+        "props": {
+          "color": "red"
+        }
+      },
+      {
+        "id": "resistor",
+        "type": "resistor",
+        "pos": [
+          19,
+          5
+        ],
+        "rot": 1,
+        "props": {
+          "resistance": 100
+        }
+      }
+    ],
+    "wires": [
+      {
+        "from": [
+          5,
+          4
+        ],
+        "to": [
+          11,
+          4
+        ]
+      }
+    ]
+  },
+  "inventory": [
+    {
+      "type": "wire",
+      "count": 2
+    }
+  ],
+  "goals": [
+    {
+      "kind": "ledOn",
+      "target": "led",
+      "minBrightness": 0.5
+    }
+  ],
+  "solution": {
+    "parts": [],
+    "wires": [
+      {
+        "from": [
+          13,
+          4
+        ],
+        "to": [
+          19,
+          4
+        ]
+      },
+      {
+        "from": [
+          19,
+          6
+        ],
+        "to": [
+          5,
+          8
+        ]
+      }
+    ]
+  }
+}

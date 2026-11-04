@@ -161,26 +161,28 @@ Effort estimates assume **one part-time developer** (evenings and weekends). Eve
 ### Phase 0: Setup & style (≈1 week)
 **Goal:** get the project skeleton and the look settled so Phase 1 can start building right away.
 - [ ] Art style guide: palette, 8 px grid, a component sprite mock-up (battery, LED, wire, resistor, switch, fan), and a mascot sketch.
-- [ ] Choose the engine, set up the repo (Vite + TS + Phaser + Vitest + ESLint/Prettier) and the CI that deploys to GitHub Pages.
+- [x] Choose the engine, set up the repo (Vite + TS + Phaser + Vitest) and the CI that deploys to GitHub Pages. (ESLint/Prettier still to add.)
 - [ ] Write the list of voice-over lines for World 1.
 
 **Exit criteria:** a running empty Phaser project deployed to a URL and a mock-up screenshot of the board. (This phase has no playtest. The first one is at the end of Phase 1.)
 
 ### Phase 1: Core tech prototype (≈3–4 weeks)
 **Goal:** prove that "drag parts, close the loop, light turns on" works and is fun, using placeholder art.
-- [ ] Grid board with snapping, pinch/zoom off, and touch + mouse input.
-- [ ] Drag parts from an inventory tray, rotate them by tapping, and remove them by dragging back to the tray.
-- [ ] Wire tool: drag from hole to hole, with an auto-routed orthogonal pixel wire.
-- [ ] Netlist builder (magic board only).
-- [ ] **Simulator v1:** linear MNA (battery, wire, resistor, switch) plus an LED (diode model, Newton–Raphson).
-- [ ] Simulator unit tests: voltage divider, series and parallel resistors, LED + resistor current, reversed LED, short circuit detection.
-- [ ] Visual feedback: LED brightness, current-dot animation along wires, short-circuit and over-current states.
-- [ ] Goal checker + "level complete" screen.
-- [ ] Level loader from JSON, with three hard-coded World 1 levels.
-- [ ] Dutch string table with English entries, the two-line label component, and the "show English words" setting (a temporary toggle button until the parent corner exists in Phase 2).
-- [ ] Placeholder Dutch voice for level intros using the browser's text-to-speech.
+- [x] Grid board with snapping, pinch/zoom off, and touch + mouse input.
+- [x] Drag parts from an inventory tray, rotate them by tapping, and remove them by dragging back to the tray.
+- [x] Wire tool: drag from hole to hole, with an auto-routed orthogonal pixel wire. Wire ends can be dragged to re-route, or onto the tray to remove the wire.
+- [x] Netlist builder (magic board only).
+- [x] **Simulator v1:** linear MNA (battery, wire, resistor, switch) plus an LED (diode model, Newton–Raphson).
+- [x] Simulator unit tests: voltage divider, series and parallel resistors, LED + resistor current, reversed LED, short circuit detection.
+- [x] Visual feedback: LED brightness, current-dot animation along wires, short-circuit and over-current states.
+- [x] Goal checker + "level complete" screen.
+- [x] Level loader from JSON, with three hard-coded World 1 levels. Each level carries a known solution that the tests check.
+- [x] Dutch string table with English entries, the two-line label component, and the "show English words" setting (a temporary toggle button until the parent corner exists in Phase 2).
+- [x] Placeholder Dutch voice for level intros using the browser's text-to-speech.
 
 **Exit criteria:** your son can complete three levels on a tablet with only verbal help from you. The simulator test suite is green.
+
+**Status:** built, and the test suite is green. Still to do: the playtest. Things to watch for: whether the parts and holes are big enough for his fingers, whether drawing wires from hole to hole makes sense to him, and whether the text-to-speech voice is understandable.
 
 ### Phase 2: Vertical slice: World 1 polished (≈3–4 weeks)
 **Goal:** one world that looks, sounds and feels like the final game.
