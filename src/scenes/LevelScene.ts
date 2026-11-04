@@ -1,9 +1,7 @@
 import Phaser from 'phaser';
 import {
-  canEndWire,
   canPlacePart,
   canPlaceWire,
-  inBounds,
   pinCells,
   routeWire,
   wireEnds,
@@ -12,6 +10,7 @@ import {
   type Wire,
 } from '../board/board';
 import { cellKey, nextRot, sameCell, type Cell, type Rot } from '../board/grid';
+import { pickBoardTarget, type BoardTarget } from '../board/pick';
 import { LEVELS, buildLevelBoard, partFromSpec, type InventoryItem, type LevelDef } from '../levels/levels';
 import { evaluateBoard, MIN_VISIBLE_AMPS, SHORT_CIRCUIT_AMPS, type BoardEval } from '../sim/evaluate';
 import { checkGoals } from '../goals/goals';
@@ -43,11 +42,7 @@ import {
 
 type Point = { x: number; y: number };
 
-type Target =
-  | { type: 'slot'; slot: Slot }
-  | { type: 'part'; part: PlacedPart }
-  | { type: 'wireEnd'; wire: Wire; end: 0 | 1 }
-  | { type: 'hole'; cell: Cell };
+type Target = { type: 'slot'; slot: Slot } | BoardTarget;
 
 type Drag =
   | { kind: 'none' }
@@ -312,32 +307,11 @@ export class LevelScene extends Phaser.Scene {
   }
 
   private hitTest(x: number, y: number): Target | null {
-    const s = this.s;
     if (y >= TRAY_Y) {
       const slot = this.slots.find((sl) => x >= sl.x && x < sl.x + sl.w && y >= sl.y && y < sl.y + sl.h);
       return slot ? { type: 'slot', slot } : null;
     }
-    // Parts: movable parts can be grabbed anywhere, fixed ones only by the body
-    // (so wires can still be drawn from their pins).
-    for (let i = this.board.parts.length - 1; i >= 0; i--) {
-      const part = this.board.parts[i];
-      const [a, b] = pinCells(part).map((c) => cellToWorld(this.layout, c));
-      const onBody = distToSegment({ x, y }, a, b) <= 8 * s;
-      const nearPin = Math.min(dist({ x, y }, a), dist({ x, y }, b)) <= 5 * s;
-      if (onBody && (!part.fixed || !nearPin)) return { type: 'part', part };
-    }
-    const cell = worldToCell(this.layout, x, y);
-    const c = cellToWorld(this.layout, cell);
-    const half = this.layout.cell / 2;
-    if (!inBounds(this.board, cell) || Math.abs(c.x - x) > half || Math.abs(c.y - y) > half) return null;
-    for (let i = this.board.wires.length - 1; i >= 0; i--) {
-      const wire = this.board.wires[i];
-      if (wire.fixed) continue;
-      const [e0, e1] = wireEnds(wire);
-      if (sameCell(e0, cell)) return { type: 'wireEnd', wire, end: 0 };
-      if (sameCell(e1, cell)) return { type: 'wireEnd', wire, end: 1 };
-    }
-    return canEndWire(this.board, cell) ? { type: 'hole', cell } : null;
+    return pickBoardTarget(this.board, this.layout, x, y);
   }
 
   private tap(target: Target): void {
@@ -347,23 +321,30 @@ export class LevelScene extends Phaser.Scene {
         if (target.slot.item.type === 'wire') this.sayKey('sayWireHowTo', 3000);
         this.wiggle(target.slot.icon);
         break;
-      case 'part': {
-        const part = target.part;
-        if (PART_DEFS[part.type].tap === 'toggle') {
-          sfx.tap();
-          part.props.closed = !part.props.closed;
-          this.refresh();
-        } else if (!part.fixed) {
-          this.rotate(part);
-        } else {
-          sfx.denied();
-          const view = this.partViews.get(part.id);
-          if (view) this.wiggle(view.sprite);
-        }
+      case 'hole':
+        // Tapping a pin acts like tapping the part.
+        if (target.part) this.tapPart(target.part, true);
         break;
-      }
+      case 'part':
+        this.tapPart(target.part);
+        break;
       default:
         break;
+    }
+  }
+
+  /** Tap on a part: switches toggle, movable parts turn, fixed parts just wiggle (unless `quiet`). */
+  private tapPart(part: PlacedPart, quiet = false): void {
+    if (PART_DEFS[part.type].tap === 'toggle') {
+      sfx.tap();
+      part.props.closed = !part.props.closed;
+      this.refresh();
+    } else if (!part.fixed) {
+      this.rotate(part);
+    } else if (!quiet) {
+      sfx.denied();
+      const view = this.partViews.get(part.id);
+      if (view) this.wiggle(view.sprite);
     }
   }
 
@@ -980,14 +961,6 @@ function isReversed(ev: BoardEval, id: string): boolean {
 
 function dist(a: Point, b: Point): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-function distToSegment(p: Point, a: Point, b: Point): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const len2 = dx * dx + dy * dy;
-  const tt = len2 === 0 ? 0 : Phaser.Math.Clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / len2, 0, 1);
-  return dist(p, { x: a.x + tt * dx, y: a.y + tt * dy });
 }
 
 function polylineLength(pts: Point[]): number {

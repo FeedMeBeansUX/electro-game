@@ -1,62 +1,9 @@
 import Phaser from 'phaser';
-import type { Cell } from './board/grid';
+import { VIEW_H, VIEW_W, computeZoom } from './layout';
 
-/** Logical resolution; everything is laid out in these units and scaled up. */
-export const VIEW_W = 480;
-export const VIEW_H = 270;
-
-/** Magic-board grid pitch in logical pixels. */
-export const CELL = 16;
-
-/** Screen position of hole (0,0) for a board of the given size, centred in the play area. */
-export const TOP_BAR_H = 28;
-export const TRAY_Y = 214;
-
-export interface BoardLayout {
-  originX: number;
-  originY: number;
-  cols: number;
-  rows: number;
-  /** Whole-number pixel scale for the board and its parts (2 = chunky, for the first levels). */
-  scale: number;
-  /** Hole pitch in logical pixels (CELL × scale). */
-  cell: number;
-}
-
-export function boardLayout(cols: number, rows: number, scale = 1): BoardLayout {
-  const cell = CELL * scale;
-  const w = (cols - 1) * cell;
-  const h = (rows - 1) * cell;
-  const top = TOP_BAR_H + 2;
-  const bottom = TRAY_Y - 2;
-  return {
-    originX: Math.round((VIEW_W - w) / 2),
-    originY: Math.round(top + (bottom - top - h) / 2),
-    cols,
-    rows,
-    scale,
-    cell,
-  };
-}
-
-export const cellToWorld = (l: BoardLayout, c: Cell): { x: number; y: number } => ({
-  x: l.originX + c.x * l.cell,
-  y: l.originY + c.y * l.cell,
-});
-
-/** Nearest hole to a world position (may be outside the board). */
-export const worldToCell = (l: BoardLayout, x: number, y: number): Cell => ({
-  x: Math.round((x - l.originX) / l.cell),
-  y: Math.round((y - l.originY) / l.cell),
-});
+export * from './layout';
 
 let currentZoom = 1;
-
-/** Integer zoom when there's room for it (crisp pixels), otherwise fit exactly. */
-export function computeZoom(width: number, height: number): number {
-  const z = Math.min(width / VIEW_W, height / VIEW_H);
-  return z >= 2 ? Math.floor(z) : z;
-}
 
 /** Zooms and centres the scene's camera on the logical view, now and on every resize. */
 export function fitCamera(scene: Phaser.Scene): void {
