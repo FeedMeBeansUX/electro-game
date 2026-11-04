@@ -362,13 +362,19 @@ function breadboardPanel(scene: Phaser.Scene, cols: number, rows: number): strin
   p.rect(0, 0, w, h, PAL.white);
   p.rect(0, h - 2, w, 2, PAL.silver).rect(w - 1, 0, 1, h, PAL.silver);
   p.clear(0, 0, 1, 1).clear(w - 1, 0, 1, 1).clear(0, h - 1, 1, 1).clear(w - 1, h - 1, 1, 1);
-  // Rails: a slightly darker band with a coloured line on the inside edge.
-  p.rect(2, rowY(0) - 6, w - 4, 12, PAL.silver, 0.25).rect(2, rowY(0) + 7, w - 4, 1, PAL.red);
-  p.rect(2, rowY(rows - 1) - 6, w - 4, 12, PAL.silver, 0.25).rect(2, rowY(rows - 1) - 8, w - 4, 1, PAL.blue);
+  // Rails: a coloured band (red for +, blue for −) with a solid line running through every
+  // hole, so it's clear the whole row is one connection.
+  const rail = (y: number, color: number) => {
+    p.rect(2, y - 6, w - 4, 12, color, 0.22);
+    p.rect(2, y - 6, w - 4, 1, color).rect(2, y + 5, w - 4, 1, color);
+    p.rect(pad - 2, y - 1, w - 2 * pad + 4, 2, color, 0.85);
+  };
+  rail(rowY(0), PAL.red);
+  rail(rowY(rows - 1), PAL.blue);
   // + and − signs at both ends of the rails.
-  for (const x of [4, w - 9]) {
-    p.rect(x, rowY(0) - 1, 5, 1, PAL.red).rect(x + 2, rowY(0) - 3, 1, 5, PAL.red);
-    p.rect(x, rowY(rows - 1), 5, 1, PAL.blue);
+  for (const x of [3, w - 8]) {
+    p.rect(x, rowY(0) - 1, 5, 1, PAL.plum).rect(x + 2, rowY(0) - 3, 1, 5, PAL.plum);
+    p.rect(x, rowY(rows - 1) - 1, 5, 1, PAL.navy);
   }
   // Middle channel.
   p.rect(2, rowY(5) - 3, w - 4, 6, PAL.silver).rect(2, rowY(5) - 3, w - 4, 1, PAL.slate);
